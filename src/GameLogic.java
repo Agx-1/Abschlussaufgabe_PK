@@ -4,6 +4,7 @@
 public class GameLogic {
 
     public static void main(String[] args) {
-        System.out.println("Hello Fabian");
+
+        System.out.println("Hello Morian");
     }
 }
