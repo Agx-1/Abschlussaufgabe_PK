@@ -6,23 +6,41 @@ import java.util.Arrays;
 public class GameLogic {
 
     //attacker has to have >1 armies in his Territory
-    public void attack(Territory attacker, Territory defendant)
+    public static void attack(Territory attacker, Territory defendant)
     {
         int[] attackerDices = new int[3];
         int[] defendantDices = new int[2];
         int iterAttack = 0;
         int iterDefend = 0;
 
-        while (attacker.getArmys() > 1 && iterAttack < 3){
+        if(attacker.getArmies() > 2){
 
-            attackerDices[iterAttack] = rollDice();
-            iterAttack++;
+            for (int i = 0; i < 3; i++) {
+
+                attackerDices[i] = rollDice();
+            }
+
+        } else{
+
+            for (int i = 0; i < attacker.getArmies(); i++) {
+
+                attackerDices[i] = rollDice();
+            }
         }
 
-        while (defendant.getArmys() > 0 && iterDefend < 2){
+        if(defendant.getArmies() > 1){
 
-            defendantDices[iterDefend] = rollDice();
-            iterDefend++;
+            for (int i = 0; i < 2; i++) {
+
+                defendantDices[i] = rollDice();
+            }
+
+        } else{
+
+            for (int i = 0; i < defendant.getArmies(); i++) {
+
+                defendantDices[i] = rollDice();
+            }
         }
 
         Arrays.sort(attackerDices);
@@ -32,19 +50,25 @@ public class GameLogic {
         System.out.println("Attacker Array: ");
         for (int i = 0; i < attackerDices.length; i++) {
 
-            System.out.println(attackerDices[i] + ", ");
+            System.out.print(attackerDices[i] + ", ");
         }
 
+        System.out.println();
         System.out.println("Defendant Array: ");
         for (int i = 0; i < defendantDices.length; i++) {
 
-            System.out.println(defendantDices[i] + ", ");
+            System.out.print(defendantDices[i] + ", ");
         }
     }
 
+    private static int rollDice(){
 
-    private int rollDice(){
+        return ((int)(Math.random()*6))%6 + 1;      //tested and approved
+    }
 
-        return ((int)(Math.random()*6))%6 + 1;
+    //just for testing
+    public static void main(String[] args) {
+
+        GameLogic.attack(new DummyTerritory(4), new DummyTerritory(2));
     }
 }
