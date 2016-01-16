@@ -13,8 +13,9 @@ public class GameLogic {
         int iterAttack = 0;
         int iterDefend = 0;
 
-        if(attacker.getArmies() > 2){
+        if(attacker.getArmies() > 3){
 
+            //if enough armies are present, send maximum of 3 into battle
             for (int i = 0; i < 3; i++) {
 
                 attackerDices[i] = rollDice();
@@ -22,14 +23,16 @@ public class GameLogic {
 
         } else{
 
-            for (int i = 0; i < attacker.getArmies(); i++) {
+            //send all armies except one, therefore -1
+            for (int i = 0; i < attacker.getArmies() - 1; i++) {
 
                 attackerDices[i] = rollDice();
             }
         }
 
-        if(defendant.getArmies() > 1){
+        if(defendant.getArmies() >= 2){
 
+            //if enough armies are present, send maximum of 2
             for (int i = 0; i < 2; i++) {
 
                 defendantDices[i] = rollDice();
@@ -45,7 +48,7 @@ public class GameLogic {
 
         Arrays.sort(attackerDices);
         Arrays.sort(defendantDices);
-
+        
         //just for testing, remove if finished
         System.out.println("Attacker Array: ");
         for (int i = 0; i < attackerDices.length; i++) {
@@ -69,6 +72,6 @@ public class GameLogic {
     //just for testing
     public static void main(String[] args) {
 
-        GameLogic.attack(new DummyTerritory(4), new DummyTerritory(2));
+        GameLogic.attack(new DummyTerritory(4), new DummyTerritory(1));
     }
 }
