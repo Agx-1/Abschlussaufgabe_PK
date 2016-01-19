@@ -48,7 +48,7 @@ public class GameLogic {
 
         Arrays.sort(attackerDices);
         Arrays.sort(defendantDices);
-        
+
         //just for testing, remove if finished
         System.out.println("Attacker Array: ");
         for (int i = 0; i < attackerDices.length; i++) {
