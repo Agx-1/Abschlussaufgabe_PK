@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by fabian on 15.01.16.
@@ -9,10 +12,11 @@ public class Map extends JFrame{
 
     Image img;
     Graphics grph;
-    int i;
+    //int i;
 
     public static void main(String[] args) {
         Map map = new Map();
+        Map.readMapFile("maps/world.map");
     }
 
     public Map(){
@@ -20,7 +24,7 @@ public class Map extends JFrame{
         this.setSize(1250,650);
         this.setResizable(true);
         this.setVisible(true);
-        i = 0;
+        //i = 0;
     }
 
     public void paint(Graphics g){
@@ -32,7 +36,6 @@ public class Map extends JFrame{
 
     }
 
-
     public void paintComponent(Graphics g){
 
 
@@ -41,5 +44,25 @@ public class Map extends JFrame{
 
 
         repaint();
+    }
+
+    public static String readMapFile(String path){
+
+        StringBuilder sb = new StringBuilder();
+
+        try{
+
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line;
+            while((line = br.readLine()) != null){
+                sb.append(line);
+                sb.append("\n");
+            }
+        }
+        catch (IOException e){
+            return null;
+        }
+
+        return sb.toString();
     }
 }
