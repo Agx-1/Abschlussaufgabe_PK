@@ -75,10 +75,11 @@ public class Map extends JFrame{
         String[] mapData = map.readMapFile("maps/world.map")
                 .split(System.getProperty("line.separator"));
 
-        String helperString;
-        String[] territory;
-        String[] coordinates;
-        int[] coordinates2;
+        String line;
+        String territory;
+
+        String[] helperCoordinates;
+        int[] coordinates;
 
         Queue<Patch> patches = new LinkedList<Patch>();
 
@@ -87,35 +88,33 @@ public class Map extends JFrame{
             if (mapData[i].startsWith("patch-of")) {
 
                 //remove patch-of
-                helperString = mapData[i].replace("patch-of ", "");
+                line = mapData[i].replace("patch-of ", "");
 
                 //remove numbers
-                territory = helperString.split(" [0-9]+");
+                territory = line.replaceAll("( [0-9]+)+", "");
+
+                System.out.println(territory);
 
                 //remove territory
-                helperString = mapData[i].replace("patch-of " + territory, "");
-                coordinates = helperString.split(" ");
+                line = mapData[i].replace("patch-of " + territory, "");
+                helperCoordinates = line.split(" ");
 
-                coordinates2 = new int[coordinates.length];
+                coordinates = new int[helperCoordinates.length];
 
-                for (int j = 0; j < coordinates.length; j++) {
+                for (int j = 0; j < helperCoordinates.length; j++) {
 
                     try{
-                        coordinates2[j] = Integer.parseInt(coordinates[j]);
+                        coordinates[j] = Integer.parseInt(helperCoordinates[j]);
                     }
                     catch (NumberFormatException nfe) {}
                 }
 
-                patches.offer(new Patch(territory.toString(), coordinates2));
-                for (int j = 0; j < territory.length; j++) {
-                    System.out.println(helperString);
-                }
+                patches.offer(new Patch(territory, coordinates));
             }
 
             if (mapData[i].startsWith("capital-of")) {
 
-                helperString = mapData[i].replace("capital-of ", "");
-                territory = helperString.split(" [0-9]+");
+                line = mapData[i].replace("capital-of ", "");
             }
 
             if (mapData[i].startsWith("neighbors-of")) {
