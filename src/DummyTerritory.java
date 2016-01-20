@@ -20,7 +20,7 @@ public class DummyTerritory implements Territory {
 
     /**
      *
-     * @param p initial patch of land contained in the Territory
+     * @param p initial patch of land, which is part of the territory
      */
     public DummyTerritory(String name, Patch p){
 
@@ -56,5 +56,10 @@ public class DummyTerritory implements Territory {
     public void addPatch(Patch p){
 
         patches.offer(p);
+    }
+
+    public LinkedList getPatches(){
+
+        return patches;
     }
 }

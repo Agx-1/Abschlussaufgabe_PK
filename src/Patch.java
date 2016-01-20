@@ -5,7 +5,7 @@ import java.awt.*;
  */
 public class Patch {
 
-    private Polygon patch = new Polygon();
+    private Polygon boarders = new Polygon();
     private String territory;
 
     public Patch(String territory, int[] coordinates){
@@ -14,7 +14,12 @@ public class Patch {
 
         for (int i = 0; i < coordinates.length - 1; i+= 2) {
 
-            patch.addPoint(coordinates[i], coordinates[i+1]);
+            boarders.addPoint(coordinates[i], coordinates[i + 1]);
         }
+    }
+
+    public Polygon getBoarders(){
+
+        return boarders;
     }
 }
