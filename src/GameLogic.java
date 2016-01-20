@@ -72,6 +72,6 @@ public class GameLogic {
     //just for testing
     public static void main(String[] args) {
 
-        GameLogic.attack(new DummyTerritory(4), new DummyTerritory(1));
+        //GameLogic.attack(new DummyTerritory(4), new DummyTerritory(1));
     }
 }

@@ -1,3 +1,5 @@
+import sun.reflect.generics.tree.Tree;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -6,24 +8,34 @@ import java.util.Queue;
  */
 public class DummyTerritory implements Territory {
 
-    String name;
-    String capital;
-    int armies;
-    LinkedList<Patch> patches = new LinkedList<Patch>();
+    private final String name;
+    private String capital;
+    private int armies;
+    private LinkedList<Patch> patches = new LinkedList<Patch>();
 
-    public DummyTerritory(int armies){
+//    public DummyTerritory(int armies){
+//
+//        this.armies = armies;
+//    }
 
-        this.armies = armies;
-    }
-
-    public DummyTerritory(String name, Queue<Patch> patches){
+    /**
+     *
+     * @param p initial patch of land contained in the Territory
+     */
+    public DummyTerritory(String name, Patch p){
 
         this.name = name;
-        while (patches.peek() != null){
-
-            this.patches.offer(patches.poll());
-        }
+        patches.offer(p);
     }
+
+//    public DummyTerritory(String name, Queue<Patch> patches){
+//
+//        this.name = name;
+//        while (patches.peek() != null){
+//
+//            this.patches.offer(patches.poll());
+//        }
+//    }
 
 
     public int getArmies(){
@@ -39,5 +51,10 @@ public class DummyTerritory implements Territory {
     public void addReinforcement(){
 
         armies++;
+    }
+
+    public void addPatch(Patch p){
+
+        patches.offer(p);
     }
 }

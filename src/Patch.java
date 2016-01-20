@@ -5,8 +5,8 @@ import java.awt.*;
  */
 public class Patch {
 
-    Polygon patch = new Polygon();
-    String territory;
+    private Polygon patch = new Polygon();
+    private String territory;
 
     public Patch(String territory, int[] coordinates){
 

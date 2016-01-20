@@ -3,32 +3,36 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by fabian on 15.01.16.
  */
 
-public class Map extends JFrame{
+public class GameMap extends JFrame{
 
     Image img;
     Graphics grph;
-    LinkedList<Territory> territories = new LinkedList<>();
-    int i;
+    Map<String, DummyTerritory> territories = new HashMap();
+    //int i;
 
     public static void main(String[] args) {
 
-        Map map = new Map();
-        createMap(map);
+        GameMap gameMap = new GameMap();
+        String[] mapData = readMapFile("maps/world.map")
+                .split(System.getProperty("line.separator"));
+
+        gameMap.createMap(mapData);
 
     }
 
-    public Map(){
+    public GameMap(){
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setSize(1250,650);
         this.setResizable(true);
         this.setVisible(true);
-        i = 0;
+        //i = 0;
     }
 
     public void paint(Graphics g){
@@ -50,7 +54,7 @@ public class Map extends JFrame{
         repaint();
     }
 
-    public String readMapFile(String path){
+    public static String readMapFile(String path){
 
         StringBuilder sb = new StringBuilder();
 
@@ -70,18 +74,16 @@ public class Map extends JFrame{
         return sb.toString();
     }
 
-    public static void createMap(Map map) {
+    public void createMap(String[] mapData) {
 
-        String[] mapData = map.readMapFile("maps/world.map")
-                .split(System.getProperty("line.separator"));
-
+        for (int i = 0; i < mapData.length; i++) {
+            System.out.println(mapData[i]);
+        }
         String line;
         String territory;
 
         String[] helperCoordinates;
         int[] coordinates;
-
-        Queue<Patch> patches = new LinkedList<Patch>();
 
         for (int i = 0; i < mapData.length; i++) {
 
@@ -93,12 +95,11 @@ public class Map extends JFrame{
                 //remove numbers
                 territory = line.replaceAll("( [0-9]+)+", "");
 
-                System.out.println(territory);
-
                 //remove territory
                 line = mapData[i].replace("patch-of " + territory, "");
                 helperCoordinates = line.split(" ");
 
+                //write content of String[] helperCoordinates into int[] coordinates
                 coordinates = new int[helperCoordinates.length];
 
                 for (int j = 0; j < helperCoordinates.length; j++) {
@@ -109,7 +110,14 @@ public class Map extends JFrame{
                     catch (NumberFormatException nfe) {}
                 }
 
-                patches.offer(new Patch(territory, coordinates));
+                if(territories.containsKey(territory)){
+
+                    territories.get(territory).addPatch(new Patch(territory, coordinates));
+
+                } else{
+
+                    territories.put(territory, new DummyTerritory(territory, new Patch(territory, coordinates)));
+                }
             }
 
             if (mapData[i].startsWith("capital-of")) {
@@ -128,6 +136,5 @@ public class Map extends JFrame{
             }
         }
     }
-
 }
 
