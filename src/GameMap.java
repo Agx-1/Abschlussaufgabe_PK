@@ -1,11 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -14,146 +12,23 @@ import java.util.Map;
 
 public class GameMap extends JFrame{
 
-    Image img;
-    Graphics grph;
-    //LinkedList<Patch> patches = null;
+    Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
 
-    Map<String, DummyTerritory> territories = new HashMap<String, DummyTerritory>();
-    //int i;
-
-    public static void main(String[] args) {
-
-        GameMap gameMap = new GameMap();
-        String[] mapData = readMapFile("maps/squares.map")
-                .split(System.getProperty("line.separator"));
-
-        gameMap.createMap(mapData);
-
-        LinkedList<Polygon> patches;
-
-        if (gameMap.territories.get("Southern").getPatches().peek() == null)
-            System.out.println("Map empty at beginning!!!!!!!!!!!!!!!!!!!!!!!!!!11111!");
-
-        for(Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
-
-            System.out.println(entry.getKey() + ":");
-            patches = entry.getValue().getPatches();
-
-            while(patches != null && patches.peek() != null){
-
-                System.out.println("x2: ");
-                for (int i = 0; i < patches.peek().xpoints.length ; i++) {
-
-                    System.out.println("Printing: x= " + patches.peek().xpoints[i]);
-                }
-                System.out.println();
-
-                System.out.println("y2: ");
-
-                for (int i = 0; i < patches.peek().ypoints.length ; i++) {
-
-                    System.out.println("Printing: y= " + patches.peek().ypoints[i]);
-                }
-//                //grph.drawPolygon((Polygon) (entry.getValue().getPatches().poll()));
-                patches.poll();
-////                //entry.getValue().getPatches().poll();
-            }
-
-        }
-        
-
-        for (Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
-
-            System.out.println(entry.getValue().getPatches().peek().xpoints[0]);
-        }
-
-        for(Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
-
-            System.out.println(entry.getKey() + ":");
-            patches = entry.getValue().getPatches();
-
-            while(patches.peek() != null){
-
-                System.out.print("x: ");
-                for (int i = 0; i < patches.peek().xpoints.length; i++) {
-
-                    System.out.print(patches.peek().xpoints[i] + " ");
-                }
-                System.out.println();
-
-                System.out.print("y: ");
-
-                for (int i = 0; i < patches.peek().ypoints.length; i++) {
-
-                    System.out.print(patches.peek().ypoints[i] + " ");
-                }
-
-                System.out.println();
-
-                patches.poll();
-            }
-        }
-
-
-
-
-    }
-
-    public GameMap(){
+    public GameMap(String path){
 
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setSize(1250,650);
         this.setResizable(true);
         this.setVisible(true);
-        //i = 0;
+
+        MapHelper drawPanel = new MapHelper(territories);
+        drawPanel.setPreferredSize(new Dimension(1250, 650));
+        this.add(drawPanel);
+
+        createMap(readMapFile(path));
     }
 
-    @Override
-    public void paint(Graphics g){
-
-        img = createImage(1250,650);
-        grph = img.getGraphics();
-        paintComponent(grph);
-        grph.drawPolygon(new Polygon(new int[]{200, 400, 400, 200, 370}, new int[]{200, 200, 400, 400, 432}, 5));
-        grph.drawPolygon(new Polygon(new int[]{200, 400, 200, 370, 120}, new int[]{200, 200, 400, 432, 720}, 5));
-
-        for(Map.Entry<String, DummyTerritory> entry : territories.entrySet()){
-
-            while(entry.getValue().getPatches().peek() != null){
-
-                for (int i = 0; i < ((Polygon)(entry.getValue().getPatches().peek())).xpoints.length ; i++) {
-
-                    System.out.println("Printing in paint(): x= " + ((Polygon)(entry.getValue().getPatches().peek())).xpoints[i]);
-                }
-
-                for (int i = 0; i < ((Polygon)(entry.getValue().getPatches().peek())).ypoints.length ; i++) {
-
-                    System.out.println("Printing in paint(): y= " + ((Polygon)(entry.getValue().getPatches().peek())).ypoints[i]);
-                }
-                grph.drawPolygon((Polygon) (entry.getValue().getPatches().poll()));
-//                //entry.getValue().getPatches().poll();
-            }
-
-        }
-
-//        while (patches != null && patches.peek() != null){
-//
-//            grph.drawPolygon(patches.poll().getBoarders());
-//        }
-
-        g.drawImage(img, 0, 0, this);
-    }
-
-    public void paintComponent(Graphics g){
-
-
-        g.setColor(new Color(0,0,150));
-        g.fillRect(0, 0, 10,10);
-
-        repaint();
-    }
-
-    public static String readMapFile(String path){
+    public String[] readMapFile(String path){
 
         StringBuilder sb = new StringBuilder();
 
@@ -170,14 +45,17 @@ public class GameMap extends JFrame{
             return null;
         }
 
-        return sb.toString();
+        return sb.toString().split(System.getProperty("line.separator"));
     }
 
     public void createMap(String[] mapData) {
 
+        //just for debugging
         for (int i = 0; i < mapData.length; i++) {
             System.out.println(mapData[i]);
         }
+        //------------------
+
         String line;
         String territory;
 
@@ -227,7 +105,7 @@ public class GameMap extends JFrame{
 
                 } else{
 
-                    territories.put(territory, new DummyTerritory(territory,
+                    territories.put(territory, new OccupiedTerritory(territory,
                                                                     new Polygon(coordX, coordY, coordX.length)));
                 }
             }
@@ -247,10 +125,8 @@ public class GameMap extends JFrame{
 
             }
         }
-    }
 
-    private void neverCalledJustStorage(){
-
+        repaint();
     }
 }
 

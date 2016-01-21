@@ -1,22 +1,23 @@
 import sun.reflect.generics.tree.Tree;
 
 import java.awt.*;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.List;
 import java.util.Queue;
 
 /**
  * Created by fabian on 15.01.16.
  */
-public class DummyTerritory implements Territory {
+public class OccupiedTerritory implements Territory {
 
     private final String name;
     private String capital;
     private int armies;
-    private LinkedList<Polygon> patches = new LinkedList<Polygon>();
+    private List<Polygon> patches = new LinkedList<>();
     //private LinkedList<Patch> patches = new LinkedList<Patch>();
     //private Polygon[] = new Polygon[]
 
-//    public DummyTerritory(int armies){
+//    public OccupiedTerritory(int armies){
 //
 //        this.armies = armies;
 //    }
@@ -25,13 +26,13 @@ public class DummyTerritory implements Territory {
      *
      * @param patch initial patch of land, which is part of the territory
      */
-    public DummyTerritory(String name, Polygon patch){
+    public OccupiedTerritory(String name, Polygon patch){
 
         this.name = name;
-        patches.offer(patch);
+        patches.add(patch);
     }
 
-//    public DummyTerritory(String name, Queue<Patch> patches){
+//    public OccupiedTerritory(String name, Queue<Patch> patches){
 //
 //        this.name = name;
 //        while (patches.peek() != null){
@@ -58,10 +59,10 @@ public class DummyTerritory implements Territory {
 
     public void addPatch(Polygon patch){
 
-        patches.offer(patch);
+        patches.add(patch);
     }
 
-    public LinkedList<Polygon> getPatches(){
+    public List<Polygon> getPatches(){
 
         return patches;
     }
