@@ -1,5 +1,6 @@
 import sun.reflect.generics.tree.Tree;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -11,7 +12,9 @@ public class DummyTerritory implements Territory {
     private final String name;
     private String capital;
     private int armies;
-    private LinkedList<Patch> patches = new LinkedList<Patch>();
+    private LinkedList<Polygon> patches = new LinkedList<Polygon>();
+    //private LinkedList<Patch> patches = new LinkedList<Patch>();
+    //private Polygon[] = new Polygon[]
 
 //    public DummyTerritory(int armies){
 //
@@ -20,12 +23,12 @@ public class DummyTerritory implements Territory {
 
     /**
      *
-     * @param p initial patch of land, which is part of the territory
+     * @param patch initial patch of land, which is part of the territory
      */
-    public DummyTerritory(String name, Patch p){
+    public DummyTerritory(String name, Polygon patch){
 
         this.name = name;
-        patches.offer(p);
+        patches.offer(patch);
     }
 
 //    public DummyTerritory(String name, Queue<Patch> patches){
@@ -53,12 +56,12 @@ public class DummyTerritory implements Territory {
         armies++;
     }
 
-    public void addPatch(Patch p){
+    public void addPatch(Polygon patch){
 
-        patches.offer(p);
+        patches.offer(patch);
     }
 
-    public LinkedList getPatches(){
+    public LinkedList<Polygon> getPatches(){
 
         return patches;
     }

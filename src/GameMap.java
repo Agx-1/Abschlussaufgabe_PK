@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,9 +16,9 @@ public class GameMap extends JFrame{
 
     Image img;
     Graphics grph;
-    Graphics grph2;
+    //LinkedList<Patch> patches = null;
 
-    Map<String, DummyTerritory> territories = new HashMap();
+    Map<String, DummyTerritory> territories = new HashMap<String, DummyTerritory>();
     //int i;
 
     public static void main(String[] args) {
@@ -28,7 +29,43 @@ public class GameMap extends JFrame{
 
         gameMap.createMap(mapData);
 
-        LinkedList<Patch> patches = null;
+        LinkedList<Polygon> patches;
+
+        if (gameMap.territories.get("Southern").getPatches().peek() == null)
+            System.out.println("Map empty at beginning!!!!!!!!!!!!!!!!!!!!!!!!!!11111!");
+
+        for(Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
+
+            System.out.println(entry.getKey() + ":");
+            patches = entry.getValue().getPatches();
+
+            while(patches != null && patches.peek() != null){
+
+                System.out.println("x2: ");
+                for (int i = 0; i < patches.peek().xpoints.length ; i++) {
+
+                    System.out.println("Printing: x= " + patches.peek().xpoints[i]);
+                }
+                System.out.println();
+
+                System.out.println("y2: ");
+
+                for (int i = 0; i < patches.peek().ypoints.length ; i++) {
+
+                    System.out.println("Printing: y= " + patches.peek().ypoints[i]);
+                }
+//                //grph.drawPolygon((Polygon) (entry.getValue().getPatches().poll()));
+                patches.poll();
+////                //entry.getValue().getPatches().poll();
+            }
+
+        }
+        
+
+        for (Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
+
+            System.out.println(entry.getValue().getPatches().peek().xpoints[0]);
+        }
 
         for(Map.Entry<String, DummyTerritory> entry : gameMap.territories.entrySet()){
 
@@ -38,17 +75,17 @@ public class GameMap extends JFrame{
             while(patches.peek() != null){
 
                 System.out.print("x: ");
-                for (int i = 0; i < patches.peek().getBoarders().xpoints.length; i++) {
+                for (int i = 0; i < patches.peek().xpoints.length; i++) {
 
-                    System.out.print(patches.peek().getBoarders().xpoints[i] + " ");
+                    System.out.print(patches.peek().xpoints[i] + " ");
                 }
                 System.out.println();
 
                 System.out.print("y: ");
 
-                for (int i = 0; i < patches.peek().getBoarders().ypoints.length; i++) {
+                for (int i = 0; i < patches.peek().ypoints.length; i++) {
 
-                    System.out.print(patches.peek().getBoarders().ypoints[i] + " ");
+                    System.out.print(patches.peek().ypoints[i] + " ");
                 }
 
                 System.out.println();
@@ -56,6 +93,9 @@ public class GameMap extends JFrame{
                 patches.poll();
             }
         }
+
+
+
 
     }
 
@@ -73,22 +113,33 @@ public class GameMap extends JFrame{
 
         img = createImage(1250,650);
         grph = img.getGraphics();
-        grph2 = img.getGraphics();
         paintComponent(grph);
-        grph2.setColor(Color.green);
-        grph2.drawRect(650, 100, 200, 200);
-
-        LinkedList<Patch> patches = null;
+        grph.drawPolygon(new Polygon(new int[]{200, 400, 400, 200, 370}, new int[]{200, 200, 400, 400, 432}, 5));
+        grph.drawPolygon(new Polygon(new int[]{200, 400, 200, 370, 120}, new int[]{200, 200, 400, 432, 720}, 5));
 
         for(Map.Entry<String, DummyTerritory> entry : territories.entrySet()){
 
-            patches = entry.getValue().getPatches();
+            while(entry.getValue().getPatches().peek() != null){
+
+                for (int i = 0; i < ((Polygon)(entry.getValue().getPatches().peek())).xpoints.length ; i++) {
+
+                    System.out.println("Printing in paint(): x= " + ((Polygon)(entry.getValue().getPatches().peek())).xpoints[i]);
+                }
+
+                for (int i = 0; i < ((Polygon)(entry.getValue().getPatches().peek())).ypoints.length ; i++) {
+
+                    System.out.println("Printing in paint(): y= " + ((Polygon)(entry.getValue().getPatches().peek())).ypoints[i]);
+                }
+                grph.drawPolygon((Polygon) (entry.getValue().getPatches().poll()));
+//                //entry.getValue().getPatches().poll();
+            }
+
         }
 
-        while (patches != null && patches.peek() != null){
-
-            g.drawPolygon(patches.poll().getBoarders());
-        }
+//        while (patches != null && patches.peek() != null){
+//
+//            grph.drawPolygon(patches.poll().getBoarders());
+//        }
 
         g.drawImage(img, 0, 0, this);
     }
@@ -131,7 +182,8 @@ public class GameMap extends JFrame{
         String territory;
 
         String[] helperCoordinates;
-        int[] coordinates;
+        int[] coordX;
+        int[] coordY;
 
         for (int i = 0; i < mapData.length; i++) {
 
@@ -144,27 +196,39 @@ public class GameMap extends JFrame{
                 territory = line.replaceAll("( [0-9]+)+", "");
 
                 //remove territory
-                line = mapData[i].replace("patch-of " + territory, "");
+                line = mapData[i].replace("patch-of " + territory + " ", "");
                 helperCoordinates = line.split(" ");
 
-                //write content of String[] helperCoordinates into int[] coordinates
-                coordinates = new int[helperCoordinates.length];
+                //write content of String[] helperCoordinates into
+                //two separate int[] coordinate-arrays
 
-                for (int j = 0; j < helperCoordinates.length; j++) {
+                coordX = new int[helperCoordinates.length/2];
+                coordY = new int[helperCoordinates.length/2];
+
+                for (int j = 0; j < coordX.length; j++) {
 
                     try{
-                        coordinates[j] = Integer.parseInt(helperCoordinates[j]);
+                        coordX[j] = Integer.parseInt(helperCoordinates[2*j]);
+                    }
+                    catch (NumberFormatException nfe) {}
+                }
+
+                for (int j = 0; j < coordY.length; j++) {
+
+                    try{
+                        coordY[j] = Integer.parseInt(helperCoordinates[2*j+1]);
                     }
                     catch (NumberFormatException nfe) {}
                 }
 
                 if(territories.containsKey(territory)){
 
-                    territories.get(territory).addPatch(new Patch(territory, coordinates));
+                    territories.get(territory).addPatch(new Polygon(coordX, coordY, coordX.length));
 
                 } else{
 
-                    territories.put(territory, new DummyTerritory(territory, new Patch(territory, coordinates)));
+                    territories.put(territory, new DummyTerritory(territory,
+                                                                    new Polygon(coordX, coordY, coordX.length)));
                 }
             }
 
