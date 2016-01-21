@@ -21,7 +21,7 @@ public class GameMap extends JFrame{
         this.setResizable(true);
         this.setVisible(true);
 
-        MapHelper drawPanel = new MapHelper(territories);
+        MapSurface drawPanel = new MapSurface(territories);
         drawPanel.setPreferredSize(new Dimension(1250, 650));
         this.add(drawPanel);
 
@@ -112,7 +112,11 @@ public class GameMap extends JFrame{
 
             if (mapData[i].startsWith("capital-of")) {
 
+                //remove capital-of
                 line = mapData[i].replace("capital-of ", "");
+
+                territory = line.replaceAll(" [0-9]", "");
+
             }
 
             if (mapData[i].startsWith("neighbors-of")) {

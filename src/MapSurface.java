@@ -5,11 +5,11 @@ import java.util.Map;
 /**
  * Created by fabian on 21.01.16.
  */
-public class MapHelper extends JPanel {
+public class MapSurface extends JPanel {
 
     private Map<String, OccupiedTerritory> territories;
 
-    public MapHelper(Map<String, OccupiedTerritory> territories){
+    public MapSurface(Map<String, OccupiedTerritory> territories){
 
         this.territories = territories;
     }

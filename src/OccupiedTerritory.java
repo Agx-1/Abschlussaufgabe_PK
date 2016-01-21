@@ -14,13 +14,6 @@ public class OccupiedTerritory implements Territory {
     private String capital;
     private int armies;
     private List<Polygon> patches = new LinkedList<>();
-    //private LinkedList<Patch> patches = new LinkedList<Patch>();
-    //private Polygon[] = new Polygon[]
-
-//    public OccupiedTerritory(int armies){
-//
-//        this.armies = armies;
-//    }
 
     /**
      *
@@ -31,16 +24,6 @@ public class OccupiedTerritory implements Territory {
         this.name = name;
         patches.add(patch);
     }
-
-//    public OccupiedTerritory(String name, Queue<Patch> patches){
-//
-//        this.name = name;
-//        while (patches.peek() != null){
-//
-//            this.patches.offer(patches.poll());
-//        }
-//    }
-
 
     public int getArmies(){
 
@@ -65,5 +48,11 @@ public class OccupiedTerritory implements Territory {
     public List<Polygon> getPatches(){
 
         return patches;
+    }
+
+    public void addCapital(String capital){
+
+        if (this.capital == null)
+            this.capital = capital;
     }
 }
