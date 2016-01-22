@@ -56,10 +56,14 @@ public class GameMap extends JFrame{
         }
         //------------------
 
+        //used to safe modifications to current line of .map file
         String line;
         String territory;
 
         String[] helperCoordinates;
+        int[] capital = new int[2];
+
+        //arrays to pass Patch-coordinates to the Polygon constructor
         int[] coordX;
         int[] coordY;
 
@@ -116,7 +120,24 @@ public class GameMap extends JFrame{
                 line = mapData[i].replace("capital-of ", "");
 
                 territory = line.replaceAll(" [0-9]", "");
+                helperCoordinates = line.replaceAll("[A-Za-z]+ ", "").split(" ");
 
+                for (int j = 0; j < helperCoordinates.length; j++) {
+
+                    try {
+                        capital[j] = Integer.parseInt(helperCoordinates[j]);
+                    }
+                    catch (NumberFormatException nfe) {}
+                }
+
+                if(territories.containsKey(territory)){
+
+                    territories.get(territory).addCapital(capital);
+
+                } else{
+
+                    territories.put(territory, new OccupiedTerritory(territory, capital));
+                }
             }
 
             if (mapData[i].startsWith("neighbors-of")) {

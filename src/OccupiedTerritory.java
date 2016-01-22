@@ -11,7 +11,7 @@ import java.util.Queue;
 public class OccupiedTerritory implements Territory {
 
     private final String name;
-    private String capital;
+    private int[] capital;
     private int armies;
     private List<Polygon> patches = new LinkedList<>();
 
@@ -23,6 +23,12 @@ public class OccupiedTerritory implements Territory {
 
         this.name = name;
         patches.add(patch);
+    }
+
+    public OccupiedTerritory(String name, int[] capital){
+
+        this.name = name;
+        this.capital = capital;
     }
 
     public int getArmies(){
@@ -50,7 +56,7 @@ public class OccupiedTerritory implements Territory {
         return patches;
     }
 
-    public void addCapital(String capital){
+    public void addCapital(int[] capital){
 
         if (this.capital == null)
             this.capital = capital;
