@@ -56,88 +56,24 @@ public class GameMap extends JFrame{
         }
         //------------------
 
-        //used to safe modifications to current line of .map file
+        //saves modifications to current line of .map file
         String line;
+
+        //saves the name of the territory in current line (if present)
         String territory;
 
         String[] helperCoordinates;
-        int[] capital = new int[2];
-
-        //arrays to pass Patch-coordinates to the Polygon constructor
-        int[] coordX;
-        int[] coordY;
 
         for (int i = 0; i < mapData.length; i++) {
 
             if (mapData[i].startsWith("patch-of")) {
 
-                //remove patch-of
-                line = mapData[i].replace("patch-of ", "");
-
-                //remove numbers
-                territory = line.replaceAll("( [0-9]+)+", "");
-
-                //remove territory
-                line = mapData[i].replace("patch-of " + territory + " ", "");
-                helperCoordinates = line.split(" ");
-
-                //write content of String[] helperCoordinates into
-                //two separate int[] coordinate-arrays
-
-                coordX = new int[helperCoordinates.length/2];
-                coordY = new int[helperCoordinates.length/2];
-
-                for (int j = 0; j < coordX.length; j++) {
-
-                    try{
-                        coordX[j] = Integer.parseInt(helperCoordinates[2*j]);
-                    }
-                    catch (NumberFormatException nfe) {}
-                }
-
-                for (int j = 0; j < coordY.length; j++) {
-
-                    try{
-                        coordY[j] = Integer.parseInt(helperCoordinates[2*j+1]);
-                    }
-                    catch (NumberFormatException nfe) {}
-                }
-
-                if(territories.containsKey(territory)){
-
-                    territories.get(territory).addPatch(new Polygon(coordX, coordY, coordX.length));
-
-                } else{
-
-                    territories.put(territory, new OccupiedTerritory(territory,
-                                                                    new Polygon(coordX, coordY, coordX.length)));
-                }
+                createPatch(mapData, i);
             }
 
             if (mapData[i].startsWith("capital-of")) {
 
-                //remove capital-of
-                line = mapData[i].replace("capital-of ", "");
-
-                territory = line.replaceAll(" [0-9]", "");
-                helperCoordinates = line.replaceAll("[A-Za-z]+ ", "").split(" ");
-
-                for (int j = 0; j < helperCoordinates.length; j++) {
-
-                    try {
-                        capital[j] = Integer.parseInt(helperCoordinates[j]);
-                    }
-                    catch (NumberFormatException nfe) {}
-                }
-
-                if(territories.containsKey(territory)){
-
-                    territories.get(territory).addCapital(capital);
-
-                } else{
-
-                    territories.put(territory, new OccupiedTerritory(territory, capital));
-                }
+                createCapital(mapData, i);
             }
 
             if (mapData[i].startsWith("neighbors-of")) {
@@ -152,6 +88,116 @@ public class GameMap extends JFrame{
         }
 
         repaint();
+    }
+
+    private void createPatch(String[] mapData, int i){
+
+        //saves modifications to current line of .map file
+        String line;
+
+        //saves the name of the territory in current line (if present)
+        String territory;
+
+        String[] helperCoordinates;
+
+        //arrays to pass Patch-coordinates to the Polygon constructor
+        int[] coordX;
+        int[] coordY;
+
+
+        //remove patch-of
+        line = mapData[i].replace("patch-of ", "");
+
+        //remove numbers
+        territory = line.replaceAll("( [0-9]+)+", "");
+
+        //remove territory
+        line = mapData[i].replace("patch-of " + territory + " ", "");
+        helperCoordinates = line.split(" ");
+
+
+        coordX = new int[helperCoordinates.length/2];
+        coordY = new int[helperCoordinates.length/2];
+
+        //fill the two arrays with corresponding coordinates
+        for (int j = 0; j < coordX.length; j++) {
+
+            try{
+                coordX[j] = Integer.parseInt(helperCoordinates[2*j]);
+            }
+            catch (NumberFormatException nfe) {}
+        }
+
+        for (int j = 0; j < coordY.length; j++) {
+
+            try{
+                coordY[j] = Integer.parseInt(helperCoordinates[2*j+1]);
+            }
+            catch (NumberFormatException nfe) {}
+        }
+
+        //either create a new entry in the territories Map or add patch to existing Territory
+        if(territories.containsKey(territory)){
+
+            territories.get(territory).addPatch(new Polygon(coordX, coordY, coordX.length));
+
+        } else{
+
+            territories.put(territory, new OccupiedTerritory(territory,
+                    new Polygon(coordX, coordY, coordX.length)));
+        }
+    }
+
+    private void createCapital(String[] mapData, int i){
+
+        String line;
+        String territory;
+        String[] helperCoordinates;
+
+        //array to pass capital coordinates to .addCapital method
+        int[] capitalCoordinates = new int[2];
+
+        //remove capital-of
+        line = mapData[i].replace("capital-of ", "");
+
+        territory = line.replaceAll("( [0-9]+)+", "");
+
+        System.out.println("Territory in createCapital: " + territory);
+        helperCoordinates = line.replaceAll("[A-Za-z]+ ", "").split(" ");
+
+        for (int j = 0; j < helperCoordinates.length; j++) {
+
+            try {
+                capitalCoordinates[j] = Integer.parseInt(helperCoordinates[j]);
+            }
+            catch (NumberFormatException nfe) {}
+        }
+
+        if(territories.containsKey(territory)){
+
+            territories.get(territory).addCapital(capitalCoordinates);
+
+        } else{
+
+            territories.put(territory, new OccupiedTerritory(territory, capitalCoordinates));
+        }
+
+
+    }
+
+    @Override
+    public String toString(){
+
+        String result = "";
+
+        for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
+
+            result += "Entry = " +  entry.getKey() + ": ";
+            result += "capital: " + entry.getValue().capital.getLocation().x + " " +
+                                    entry.getValue().capital.getLocation().y + "\n";
+        }
+
+        return  result;
     }
 }
 

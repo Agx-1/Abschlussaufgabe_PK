@@ -3,7 +3,6 @@ import sun.reflect.generics.tree.Tree;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Created by fabian on 15.01.16.
@@ -11,7 +10,7 @@ import java.util.Queue;
 public class OccupiedTerritory implements Territory {
 
     private final String name;
-    private int[] capital;
+    public Label capital = new Label("");
     private int armies;
     private List<Polygon> patches = new LinkedList<>();
 
@@ -25,10 +24,10 @@ public class OccupiedTerritory implements Territory {
         patches.add(patch);
     }
 
-    public OccupiedTerritory(String name, int[] capital){
+    public OccupiedTerritory(String name, int[] capitalCoordinates){
 
         this.name = name;
-        this.capital = capital;
+        this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
     }
 
     public int getArmies(){
@@ -39,11 +38,13 @@ public class OccupiedTerritory implements Territory {
     public void removeArmy(){
 
         armies--;
+        capital.setText(Integer.toString(armies));
     }
 
     public void addReinforcement(){
 
         armies++;
+        capital.setText(Integer.toString(armies));
     }
 
     public void addPatch(Polygon patch){
@@ -56,9 +57,15 @@ public class OccupiedTerritory implements Territory {
         return patches;
     }
 
-    public void addCapital(int[] capital){
+    public void addCapital(int[] capitalCoordinates){
 
-        if (this.capital == null)
-            this.capital = capital;
+        if (this.capital.getText() == ""){
+
+            this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+            capital.setText("0");
+            capital.setVisible(true);
+        }
+
+
     }
 }
