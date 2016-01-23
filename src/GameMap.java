@@ -51,18 +51,18 @@ public class GameMap extends JFrame{
     public void createMap(String[] mapData) {
 
         //just for debugging
-        for (int i = 0; i < mapData.length; i++) {
-            System.out.println(mapData[i]);
-        }
+//        for (int i = 0; i < mapData.length; i++) {
+//            System.out.println(mapData[i]);
+//        }
         //------------------
 
-        //saves modifications to current line of .map file
-        String line;
-
-        //saves the name of the territory in current line (if present)
-        String territory;
-
-        String[] helperCoordinates;
+//        //saves modifications to current line of .map file
+//        String line;
+//
+//        //saves the name of the territory in current line (if present)
+//        String territory;
+//
+//        String[] helperCoordinates;
 
         for (int i = 0; i < mapData.length; i++) {
 
@@ -162,8 +162,7 @@ public class GameMap extends JFrame{
 
         territory = line.replaceAll("( [0-9]+)+", "");
 
-        System.out.println("Territory in createCapital: " + territory);
-        helperCoordinates = line.replaceAll("[A-Za-z]+ ", "").split(" ");
+        helperCoordinates = line.replaceAll(territory + " ", "").split(" ");
 
         for (int j = 0; j < helperCoordinates.length; j++) {
 
@@ -192,9 +191,9 @@ public class GameMap extends JFrame{
 
         for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
 
-            result += "Entry = " +  entry.getKey() + ": ";
-            result += "capital: " + entry.getValue().capital.getLocation().x + " " +
-                                    entry.getValue().capital.getLocation().y + "\n";
+            result += "Territory <" +  entry.getKey() + "> \n     ";
+            result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
+                                    entry.getValue().capital.getLocation().y + "]\n\n";
         }
 
         return  result;
