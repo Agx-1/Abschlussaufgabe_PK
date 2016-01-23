@@ -12,6 +12,6 @@ public class Main {
 
         System.out.println(gameMap.toString());
 
-
+        System.out.println("Hallo Moritz!");
     }
 }
