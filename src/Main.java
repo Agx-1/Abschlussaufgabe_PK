@@ -11,6 +11,7 @@ public class Main {
         GameMap gameMap = new GameMap("maps/squares.map");
 
         System.out.println(gameMap.toString());
-        System.out.println("Change by Fabian");
+        System.out.println("Change by Moritz");
+
     }
 }
