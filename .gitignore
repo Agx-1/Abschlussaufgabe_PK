@@ -1,6 +1,7 @@
 *.class
 *.xml
 *~
+Abschlussaufgabe_PK.iml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
