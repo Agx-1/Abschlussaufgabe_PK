@@ -3,6 +3,8 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -32,13 +34,20 @@ public class GameMap extends JFrame{
     public String[] readMapFile(String path){
 
         StringBuilder sb = new StringBuilder();
+        Scanner s;
 
-        Scanner s = new Scanner(path);
+        try {
+            s = new Scanner(Paths.get(path));
 
-        while(s.hasNextLine()){
+            while(s.hasNextLine()){
 
-            sb.append(s.nextLine());
-            sb.append("\n");
+                sb.append(s.nextLine());
+                sb.append("\n");
+            }
+        }
+        catch (IOException e){
+            System.out.println(".map file not found");
+            return null;
         }
 //        try{
 //
@@ -53,7 +62,12 @@ public class GameMap extends JFrame{
 //            return null;
 //        }
 
+
+        //maybe the line.separator property is NOT system-specific (although it should be, of course...)
+        //please try the good old \n instead and report whether it works
+
         return sb.toString().split(System.getProperty("line.separator"));
+        //return sb.toString().split(System.getProperty("\n"));
     }
 
     public void createMap(String[] mapData) {
@@ -199,9 +213,23 @@ public class GameMap extends JFrame{
 
         for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
 
-            result += "Territory <" +  entry.getKey() + "> \n     ";
+            result += "Territory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
-                                    entry.getValue().capital.getLocation().y + "]\n\n";
+                                    entry.getValue().capital.getLocation().y + "]\n     ";
+            result += "patches: ";
+
+            for (Polygon p : entry.getValue().getPatches()){
+
+                result += "{ ";
+                for (int i = 0; i < p.xpoints.length; i++) {
+
+                    result += "[" + p.xpoints[i] + ";";
+                    result +=       p.ypoints[i] + "], ";
+                }
+                result += " }" + "\n              ";
+            }
+
+            result += "\n";
         }
 
         return  result;
