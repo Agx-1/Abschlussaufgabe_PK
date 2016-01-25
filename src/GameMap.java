@@ -216,10 +216,11 @@ public class GameMap extends JFrame{
             result += "Territory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
                                     entry.getValue().capital.getLocation().y + "]\n     ";
-            result += "patches: { ";
+            result += "patches: ";
 
             for (Polygon p : entry.getValue().getPatches()){
 
+                result += "{ ";
                 for (int i = 0; i < p.xpoints.length; i++) {
 
                     result += "[" + p.xpoints[i] + ";";
