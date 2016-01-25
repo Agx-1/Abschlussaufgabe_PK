@@ -213,9 +213,22 @@ public class GameMap extends JFrame{
 
         for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
 
-            result += "Territory <" +  entry.getKey() + "> \n     ";
+            result += "Territory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
-                                    entry.getValue().capital.getLocation().y + "]\n\n";
+                                    entry.getValue().capital.getLocation().y + "]\n     ";
+            result += "patches: { ";
+
+            for (Polygon p : entry.getValue().getPatches()){
+
+                for (int i = 0; i < p.xpoints.length; i++) {
+
+                    result += "[" + p.xpoints[i] + ";";
+                    result +=       p.ypoints[i] + "], ";
+                }
+                result += " }" + "\n              ";
+            }
+
+            result += "\n";
         }
 
         return  result;
