@@ -42,7 +42,7 @@ public class GameMap extends JFrame{
             while(s.hasNextLine()){
 
                 sb.append(s.nextLine());
-                sb.append("\n");
+                sb.append("$");
             }
         }
         catch (IOException e){
@@ -62,11 +62,7 @@ public class GameMap extends JFrame{
 //            return null;
 //        }
 
-
-        //maybe the line.separator property is NOT system-specific (although it should be, of course...)
-        //please try the good old \n instead and report whether it works
-
-        return sb.toString().split(System.getProperty("line.separator"));
+        return sb.toString().split("\\$");
         //return sb.toString().split(System.getProperty("\n"));
     }
 
