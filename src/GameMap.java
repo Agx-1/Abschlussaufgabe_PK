@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -31,33 +29,12 @@ public class GameMap extends JFrame{
         createMap(readMapFile(path));
     }
 
-    public LinkedList<String> readMapFile(String path){
-
-        LinkedList<String> result = new LinkedList<>();
-        Scanner s;
-
-        try {
-            s = new Scanner(Paths.get(path));
-
-            while(s.hasNextLine()){
-
-                result.add(s.nextLine());
-            }
-        }
-        catch (IOException e){
-            System.out.println(".map file not found");
-            return null;
-        }
-
-        return result;
-    }
-
     public void createMap(LinkedList<String> mapData) {
 
-        //just for debugging
-//        for (int i = 0; i < mapData.length; i++) {
-//            System.out.println(mapData[i]);
-//        }
+//        just for debugging
+        for (String line : mapData){
+            System.out.println(line);
+        }
         //------------------
 
         for (String line : mapData){
@@ -145,7 +122,7 @@ public class GameMap extends JFrame{
         //get coordinates by removing territory
         helperCoordinates = line.replaceAll(territory + " ", "").split(" ");
 
-        for (int j = 0; j < helperCoordinates.length; j++) {
+        for (int j = 0; j < capitalCoordinates.length; j++) {
 
             try {
                 capitalCoordinates[j] = Integer.parseInt(helperCoordinates[j]);
@@ -163,6 +140,27 @@ public class GameMap extends JFrame{
         }
 
 
+    }
+
+    private LinkedList<String> readMapFile(String path){
+
+        LinkedList<String> result = new LinkedList<>();
+        Scanner s;
+
+        try {
+            s = new Scanner(Paths.get(path));
+
+            while(s.hasNextLine()){
+
+                result.add(s.nextLine());
+            }
+        }
+        catch (IOException e){
+            System.out.println(".map file not found");
+            return null;
+        }
+
+        return result;
     }
 
     @Override

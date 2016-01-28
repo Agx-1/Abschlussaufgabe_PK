@@ -1,13 +1,15 @@
 import sun.reflect.generics.tree.Tree;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
 /**
  * Created by fabian on 15.01.16.
  */
-public class OccupiedTerritory implements Territory {
+public class OccupiedTerritory implements Territory, MouseListener {
 
     private final String name;
     public Label capital = new Label("");
@@ -66,6 +68,40 @@ public class OccupiedTerritory implements Territory {
             capital.setVisible(true);
         }
 
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+
+        Graphics g2d;
+
+        for (Polygon p : patches){
+
+            if (p.contains(mouseEvent.getPoint())){
+
+                
+            }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
 
     }
 }
