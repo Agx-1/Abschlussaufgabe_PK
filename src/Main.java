@@ -11,7 +11,5 @@ public class Main {
         GameMap gameMap = new GameMap("maps/world.map");
 
         System.out.println(gameMap.toString());
-        System.out.println("Change by Moritz");
-
     }
 }

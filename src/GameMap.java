@@ -3,9 +3,9 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -31,9 +31,9 @@ public class GameMap extends JFrame{
         createMap(readMapFile(path));
     }
 
-    public String[] readMapFile(String path){
+    public LinkedList<String> readMapFile(String path){
 
-        StringBuilder sb = new StringBuilder();
+        LinkedList<String> result = new LinkedList<>();
         Scanner s;
 
         try {
@@ -41,32 +41,18 @@ public class GameMap extends JFrame{
 
             while(s.hasNextLine()){
 
-                sb.append(s.nextLine());
-                sb.append("$");
+                result.add(s.nextLine());
             }
         }
         catch (IOException e){
             System.out.println(".map file not found");
             return null;
         }
-//        try{
-//
-//            BufferedReader br = new BufferedReader(new FileReader(path));
-//            String line;
-//            while((line = br.readLine()) != null){
-//                sb.append(line);
-//                sb.append("\n");
-//            }
-//        }
-//        catch (IOException e){
-//            return null;
-//        }
 
-        return sb.toString().split("\\$");
-        //return sb.toString().split(System.getProperty("\n"));
+        return result;
     }
 
-    public void createMap(String[] mapData) {
+    public void createMap(LinkedList<String> mapData) {
 
         //just for debugging
 //        for (int i = 0; i < mapData.length; i++) {
@@ -74,44 +60,23 @@ public class GameMap extends JFrame{
 //        }
         //------------------
 
-//        //saves modifications to current line of .map file
-//        String line;
-//
-//        //saves the name of the territory in current line (if present)
-//        String territory;
-//
-//        String[] helperCoordinates;
+        for (String line : mapData){
 
-        for (int i = 0; i < mapData.length; i++) {
+            if(line.startsWith("patch-of")){
 
-            if (mapData[i].startsWith("patch-of")) {
-
-                createPatch(mapData, i);
+                createPatch(line);
             }
 
-            if (mapData[i].startsWith("capital-of")) {
+            if (line.startsWith("capital-of")) {
 
-                createCapital(mapData, i);
-            }
-
-            if (mapData[i].startsWith("neighbors-of")) {
-
-
-            }
-
-            if (mapData[i].startsWith("continent")) {
-
-
+                createCapital(line);
             }
         }
 
         repaint();
     }
 
-    private void createPatch(String[] mapData, int i){
-
-        //saves modifications to current line of .map file
-        String line;
+    private void createPatch(String line){
 
         //saves the name of the territory in current line (if present)
         String territory;
@@ -122,17 +87,14 @@ public class GameMap extends JFrame{
         int[] coordX;
         int[] coordY;
 
-
         //remove patch-of
-        line = mapData[i].replace("patch-of ", "");
+        line = line.replace("patch-of ", "");
 
-        //remove numbers
+        //get territory by removing coordinates
         territory = line.replaceAll("( [0-9]+)+", "");
 
-        //remove territory
-        line = mapData[i].replace("patch-of " + territory + " ", "");
-        helperCoordinates = line.split(" ");
-
+        //get coordinates by removing territory
+        helperCoordinates = line.replace(territory + " ", "").split(" ");
 
         coordX = new int[helperCoordinates.length/2];
         coordY = new int[helperCoordinates.length/2];
@@ -162,13 +124,12 @@ public class GameMap extends JFrame{
         } else{
 
             territories.put(territory, new OccupiedTerritory(territory,
-                    new Polygon(coordX, coordY, coordX.length)));
+                                                                new Polygon(coordX, coordY, coordX.length)));
         }
     }
 
-    private void createCapital(String[] mapData, int i){
+    private void createCapital(String line){
 
-        String line;
         String territory;
         String[] helperCoordinates;
 
@@ -176,10 +137,12 @@ public class GameMap extends JFrame{
         int[] capitalCoordinates = new int[2];
 
         //remove capital-of
-        line = mapData[i].replace("capital-of ", "");
+        line = line.replace("capital-of ", "");
 
+        //get territory by removing coordinates
         territory = line.replaceAll("( [0-9]+)+", "");
 
+        //get coordinates by removing territory
         helperCoordinates = line.replaceAll(territory + " ", "").split(" ");
 
         for (int j = 0; j < helperCoordinates.length; j++) {
