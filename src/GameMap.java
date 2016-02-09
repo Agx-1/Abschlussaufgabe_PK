@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class GameMap extends JFrame{
 
     Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
+    MapSurface drawPanel;
 
     public GameMap(String path){
 
@@ -22,9 +23,10 @@ public class GameMap extends JFrame{
         this.setResizable(true);
         this.setVisible(true);
 
-        MapSurface drawPanel = new MapSurface(territories);
+        drawPanel = new MapSurface(territories);
         drawPanel.setPreferredSize(new Dimension(1250, 650));
         this.add(drawPanel);
+        drawPanel.addMouseListener(drawPanel);
 
         createMap(readMapFile(path));
     }
