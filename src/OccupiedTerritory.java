@@ -1,17 +1,17 @@
-import sun.reflect.generics.tree.Tree;
-
+import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by fabian on 15.01.16.
  */
-public class OccupiedTerritory implements Territory {
+public class OccupiedTerritory implements Territory{
 
     private final String name;
     public Label capital = new Label("");
     private int armies;
+    public boolean occupied = false;
     private List<Polygon> patches = new LinkedList<>();
 
     /**
@@ -65,7 +65,10 @@ public class OccupiedTerritory implements Territory {
             capital.setText("0");
             capital.setVisible(true);
         }
+    }
 
+    public void setOccupied(boolean occupied){
 
+        this.occupied = occupied;
     }
 }

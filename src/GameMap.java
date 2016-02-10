@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -13,51 +13,84 @@ import java.util.Scanner;
  * Created by fabian on 15.01.16.
  */
 
-public class GameMap extends JFrame{
+public class GameMap {
 
     Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
 
+    JFrame mainMap;
+
     public GameMap(String path){
 
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setSize(1250,650);
-        this.setResizable(true);
-        this.setVisible(true);
+        mainMap = new JFrame();
 
-        MapSurface drawPanel = new MapSurface(territories);
-        drawPanel.setPreferredSize(new Dimension(1250, 650));
-        this.add(drawPanel);
+        mainMap.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainMap.setSize(1250, 650);
+        mainMap.setResizable(false);
+        mainMap.setVisible(true);
+
+        JPanel p = new JPanel() {
+
+            @Override
+            protected void paintComponent(Graphics g) {
+
+                //super.paintComponent(g);      //maybe needed if some Component is ONLY added to JFrame
+
+                g.setColor(Color.BLACK);
+
+                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+
+                    for (Polygon p : entry.getValue().getPatches()) {
+
+                        g.drawPolygon(p);
+
+                        if(entry.getValue().occupied)
+                            g.fillPolygon(p);
+                    }
+                }
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(1250, 650);
+            }
+        };
+
+        MouseAdapter ma = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent me) {
+
+                //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
+
+                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+
+                    for (Polygon p : entry.getValue().getPatches()) {
+
+                        if (p.contains(me.getPoint())){
+
+                            //System.out.println("Clicked polygon");  //debugging only
+                            entry.getValue().setOccupied(true);
+                        }
+                    }
+                }
+
+                mainMap.repaint();
+            }
+        };
+
+        p.addMouseListener(ma);
+
+        mainMap.add(p);
+        mainMap.pack();
 
         createMap(readMapFile(path));
     }
-
-    public LinkedList<String> readMapFile(String path){
-
-        LinkedList<String> result = new LinkedList<>();
-        Scanner s;
-
-        try {
-            s = new Scanner(Paths.get(path));
-
-            while(s.hasNextLine()){
-
-                result.add(s.nextLine());
-            }
-        }
-        catch (IOException e){
-            System.out.println(".map file not found");
-            return null;
-        }
-
-        return result;
-    }
-
     public void createMap(LinkedList<String> mapData) {
 
-        //just for debugging
-//        for (int i = 0; i < mapData.length; i++) {
-//            System.out.println(mapData[i]);
-//        }
+//        just for debugging
+        for (String line : mapData){
+            System.out.println(line);
+        }
         //------------------
 
         for (String line : mapData){
@@ -73,7 +106,7 @@ public class GameMap extends JFrame{
             }
         }
 
-        repaint();
+        mainMap.repaint();
     }
 
     private void createPatch(String line){
@@ -145,7 +178,7 @@ public class GameMap extends JFrame{
         //get coordinates by removing territory
         helperCoordinates = line.replaceAll(territory + " ", "").split(" ");
 
-        for (int j = 0; j < helperCoordinates.length; j++) {
+        for (int j = 0; j < capitalCoordinates.length; j++) {
 
             try {
                 capitalCoordinates[j] = Integer.parseInt(helperCoordinates[j]);
@@ -163,6 +196,27 @@ public class GameMap extends JFrame{
         }
 
 
+    }
+
+    private LinkedList<String> readMapFile(String path){
+
+        LinkedList<String> result = new LinkedList<>();
+        Scanner s;
+
+        try {
+            s = new Scanner(Paths.get(path));
+
+            while(s.hasNextLine()){
+
+                result.add(s.nextLine());
+            }
+        }
+        catch (IOException e){
+            System.out.println(".map file not found");
+            return null;
+        }
+
+        return result;
     }
 
     @Override
