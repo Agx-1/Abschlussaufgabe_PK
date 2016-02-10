@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by fabian on 15.01.16.
  */
-public class OccupiedTerritory extends JPanel implements Territory{
+public class OccupiedTerritory implements Territory{
 
     private final String name;
     public Label capital = new Label("");
