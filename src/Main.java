@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 /**
  * Created by fabian on 21.01.16.
@@ -10,6 +11,6 @@ public class Main {
 
         GameMap gameMap = new GameMap("maps/world.map");
 
-        System.out.println(gameMap.toString());
+        //System.out.println(gameMap.toString());
     }
 }
