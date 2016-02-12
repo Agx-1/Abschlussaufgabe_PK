@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -15,9 +14,10 @@ import java.util.*;
 
 public class GameMap {
 
-    Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
+    private Map<String, Territory> territories = new HashMap<String, Territory>();
+    private Map<String, Continent> continents = new HashMap<>();
 
-    JFrame mainMap;
+    private JFrame mainMap;
 
 
     public GameMap(String path){
@@ -53,7 +53,7 @@ public class GameMap {
                 g.setColor(Color.WHITE);
 
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
+                for (Map.Entry<String, Territory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
 
                     String from = entry.getKey();                               //Von...
                     int fromX = (int)entry.getValue().capital.getLocation().x;
@@ -61,7 +61,7 @@ public class GameMap {
 
 
 
-                    for (Map.Entry<String, OccupiedTerritory> subEntry : territories.entrySet()){
+                    for (Map.Entry<String, Territory> subEntry : territories.entrySet()){
                         if(territories.get(from).hasNeighbor(subEntry.getKey())){
 
                             String to = subEntry.getKey();                      //Nach...
@@ -82,7 +82,7 @@ public class GameMap {
 
 
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
@@ -90,7 +90,7 @@ public class GameMap {
                         g.fillPolygon(p);
 
                         g.setColor(Color.GREEN);
-                        if(entry.getValue().occupied)
+                        if(entry.getValue().occupied >= 0)
                             g.fillPolygon(p);
                         g.setColor(Color.BLACK);
                         g.drawPolygon(p);
@@ -118,14 +118,14 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
                         if (p.contains(me.getPoint())){
 
                             //System.out.println("Clicked polygon");  //debugging only
-                            entry.getValue().setOccupied(true);
+                            entry.getValue().setOccupied(0);
                         }
                     }
                 }
@@ -148,13 +148,14 @@ public class GameMap {
 
         createMap(readMapFile(path));
     }
+
     public void createMap(LinkedList<String> mapData) {
 
 //        just for debugging
         for (String line : mapData){
             System.out.println(line);
         }
-        //------------------
+//        ------------------
 
         for (String line : mapData){
 
@@ -178,7 +179,7 @@ public class GameMap {
 
     private void createPatch(String line){
 
-        //saves the name of the territory in current line (if present)
+        //saves the name of the territory in current line
         String territory;
 
         String[] helperCoordinates;
@@ -204,26 +205,19 @@ public class GameMap {
 
             try{
                 coordX[j] = Integer.parseInt(helperCoordinates[2*j]);
-            }
-            catch (NumberFormatException nfe) {}
-        }
-
-        for (int j = 0; j < coordY.length; j++) {
-
-            try{
                 coordY[j] = Integer.parseInt(helperCoordinates[2*j+1]);
             }
             catch (NumberFormatException nfe) {}
         }
 
-        //either create a new entry in the territories Map or add patch to existing Territory
+        //either create a new entry in the territories Map or add patch to existing VoidTerritory
         if(territories.containsKey(territory)){
 
             territories.get(territory).addPatch(new Polygon(coordX, coordY, coordX.length));
 
         } else{
 
-            territories.put(territory, new OccupiedTerritory(territory,
+            territories.put(territory, new Territory(territory,
                                                                 new Polygon(coordX, coordY, coordX.length)));
         }
     }
@@ -259,7 +253,7 @@ public class GameMap {
 
         } else{
 
-            territories.put(territory, new OccupiedTerritory(territory, capitalCoordinates));
+            territories.put(territory, new Territory(territory, capitalCoordinates));
         }
 
 
@@ -288,6 +282,15 @@ public class GameMap {
 
     }
 
+    private void createContinent(String line){
+
+
+    }
+
+    public Map<String, Continent> getContinents(){
+
+        return continents;
+    }
 
 
     private LinkedList<String> readMapFile(String path){
@@ -302,6 +305,8 @@ public class GameMap {
 
                 result.add(s.nextLine());
             }
+
+            s.close();
         }
         catch (IOException e){
             System.out.println(".map file not found");
@@ -316,7 +321,7 @@ public class GameMap {
 
         String result = "";
 
-        for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
             result += "Territory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +

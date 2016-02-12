@@ -5,18 +5,21 @@ import java.util.Arrays;
  */
 public class GameLogic {
 
-    //attacker has to have >1 armies in his Territory
-    public static void attack(Territory attacker, Territory defendant)
+    //attacker has to have >1 armies in his VoidTerritory
+    public static void attack(VoidTerritory attacker, VoidTerritory defender)
     {
-        int[] attackerDices = new int[3];
-        int[] defendantDices = new int[2];
-        int iterAttack = 0;
-        int iterDefend = 0;
+        int[] attackerDices;
+        int[] defenderDices;
 
-        if(attacker.getArmies() > 3){
+        final int maxAttackers = 3;      //how many armies can attack at once
+        final int maxDefenders = 2;      //how many armies can defend at once
 
-            //if enough armies are present, send maximum of 3 into battle
-            for (int i = 0; i < 3; i++) {
+        if(attacker.getArmies() > maxAttackers){
+
+            attackerDices = new int[maxAttackers];
+
+            //if enough armies are present, send maximum into battle
+            for (int i = 0; i < attackerDices.length; i++) {
 
                 attackerDices[i] = rollDice();
             }
@@ -24,30 +27,39 @@ public class GameLogic {
         } else{
 
             //send all armies except one, therefore -1
-            for (int i = 0; i < attacker.getArmies() - 1; i++) {
+            attackerDices = new int[attacker.getArmies() - 1];
+
+            for (int i = 0; i < attackerDices.length; i++) {
 
                 attackerDices[i] = rollDice();
             }
         }
 
-        if(defendant.getArmies() >= 2){
+        if(defender.getArmies() >= maxDefenders){
+
+            defenderDices = new int[maxDefenders];
 
             //if enough armies are present, send maximum of 2
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < defenderDices.length; i++) {
 
-                defendantDices[i] = rollDice();
+                defenderDices[i] = rollDice();
             }
 
         } else{
 
-            for (int i = 0; i < defendant.getArmies(); i++) {
+            defenderDices = new int[defender.getArmies()];
 
-                defendantDices[i] = rollDice();
+            for (int i = 0; i < defenderDices.length; i++) {
+
+                defenderDices[i] = rollDice();
             }
         }
 
         Arrays.sort(attackerDices);
-        Arrays.sort(defendantDices);
+        Arrays.sort(defenderDices);
+
+        attackerDices = reverse(attackerDices);
+        defenderDices = reverse(defenderDices);
 
         //just for testing, remove if finished
         System.out.println("Attacker Array: ");
@@ -57,21 +69,57 @@ public class GameLogic {
         }
 
         System.out.println();
-        System.out.println("Defendant Array: ");
-        for (int i = 0; i < defendantDices.length; i++) {
+        System.out.println("Defender Array: ");
+        for (int i = 0; i < defenderDices.length; i++) {
 
-            System.out.print(defendantDices[i] + ", ");
+            System.out.print(defenderDices[i] + ", ");
         }
+        System.out.println();
+        System.out.println();
+
+        //taking the minimum assures the index staying in the array, even if there are more defenders than attackers
+        for (int i = 0; i < Math.min(defenderDices.length, attackerDices.length); i++) {
+
+                if (attackerDices[i] > defenderDices[i]) {
+
+                    defender.removeArmy();
+                    System.out.println("One defender died.");
+
+                } else {
+
+                    attacker.removeArmy();
+                    System.out.println("One attacker died.");
+                }
+
+            if(defender.getArmies() == 0){
+
+                System.out.println("Attacker occupied territory with " + attackerDices.length + " armies.");
+            }
+        }
+
+        System.out.println("Armies defender: " + defender.getArmies());
+        System.out.println("Armies attacker: " + attacker.getArmies());
+    }
+
+    public static void distributeReinforcements(){
+
     }
 
     private static int rollDice(){
 
         return ((int)(Math.random()*6))%6 + 1;      //tested and approved
+
     }
 
-    //just for testing
-    public static void main(String[] args) {
+    private static int[] reverse(int[] array){
 
-        //GameLogic.attack(new OccupiedTerritory(4), new OccupiedTerritory(1));
+        int[] result = new int[array.length];
+
+        for (int i = 0; i < array.length; i++) {
+
+            result[i] = array[array.length - i - 1];
+        }
+
+        return result;
     }
 }
