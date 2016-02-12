@@ -5,8 +5,8 @@ import java.util.Arrays;
  */
 public class GameLogic {
 
-    //attacker has to have >1 armies in his Territory
-    public static void attack(Territory attacker, Territory defender)
+    //attacker has to have >1 armies in his VoidTerritory
+    public static void attack(VoidTerritory attacker, VoidTerritory defender)
     {
         int[] attackerDices;
         int[] defenderDices;

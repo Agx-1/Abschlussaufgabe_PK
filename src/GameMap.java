@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -14,7 +13,7 @@ import java.util.*;
 
 public class GameMap {
 
-    private Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
+    private Map<String, VoidTerritory> territories = new HashMap<String, VoidTerritory>();
     private Map<String, Continent> continents = new HashMap<>();
 
     private JFrame mainMap;
@@ -41,7 +40,7 @@ public class GameMap {
                 g.setColor(Color.BLACK);
 
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
+                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
 
                     String from = entry.getKey();                               //Von...
                     int fromX = (int)entry.getValue().capital.getLocation().x;
@@ -49,7 +48,7 @@ public class GameMap {
 
 
 
-                    for (Map.Entry<String, OccupiedTerritory> subEntry : territories.entrySet()){
+                    for (Map.Entry<String, VoidTerritory> subEntry : territories.entrySet()){
                         if(territories.get(from).hasNeighbor(subEntry.getKey())){
 
                             String to = subEntry.getKey();                      //Nach...
@@ -70,7 +69,7 @@ public class GameMap {
 
 
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
@@ -78,7 +77,7 @@ public class GameMap {
                         g.fillPolygon(p);
 
                         g.setColor(Color.GREEN);
-                        if(entry.getValue().occupied)
+                        if(entry.getValue().occupied >= 0)
                             g.fillPolygon(p);
                         g.setColor(Color.BLACK);
                         g.drawPolygon(p);
@@ -102,14 +101,14 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
                         if (p.contains(me.getPoint())){
 
                             //System.out.println("Clicked polygon");  //debugging only
-                            entry.getValue().setOccupied(true);
+                            entry.getValue().setOccupied(0);
                         }
                     }
                 }
@@ -187,14 +186,14 @@ public class GameMap {
             catch (NumberFormatException nfe) {}
         }
 
-        //either create a new entry in the territories Map or add patch to existing Territory
+        //either create a new entry in the territories Map or add patch to existing VoidTerritory
         if(territories.containsKey(territory)){
 
             territories.get(territory).addPatch(new Polygon(coordX, coordY, coordX.length));
 
         } else{
 
-            territories.put(territory, new OccupiedTerritory(territory,
+            territories.put(territory, new VoidTerritory(territory,
                                                                 new Polygon(coordX, coordY, coordX.length)));
         }
     }
@@ -230,7 +229,7 @@ public class GameMap {
 
         } else{
 
-            territories.put(territory, new OccupiedTerritory(territory, capitalCoordinates));
+            territories.put(territory, new VoidTerritory(territory, capitalCoordinates));
         }
 
 
@@ -298,9 +297,9 @@ public class GameMap {
 
         String result = "";
 
-        for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){
+        for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()){
 
-            result += "Territory <" +  entry.getKey() + ">\n     ";
+            result += "VoidTerritory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
                                     entry.getValue().capital.getLocation().y + "]\n     ";
             result += "patches: ";
