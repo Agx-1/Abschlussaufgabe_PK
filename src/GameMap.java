@@ -2,12 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+
 
 /**
  * Created by fabian on 15.01.16.
@@ -25,28 +24,69 @@ public class GameMap {
         mainMap = new JFrame();
 
         mainMap.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainMap.setSize(1250, 650);
+        mainMap.setBackground(new Color(50,60,250));
         mainMap.setResizable(false);
         mainMap.setVisible(true);
 
         JPanel p = new JPanel() {
+
 
             @Override
             protected void paintComponent(Graphics g) {
 
                 //super.paintComponent(g);      //maybe needed if some Component is ONLY added to JFrame
 
+
                 g.setColor(Color.BLACK);
+
+
+                for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
+
+                    String from = entry.getKey();                               //Von...
+                    int fromX = (int)entry.getValue().capital.getLocation().x;
+                    int fromY = (int)entry.getValue().capital.getLocation().y;
+
+
+
+                    for (Map.Entry<String, OccupiedTerritory> subEntry : territories.entrySet()){
+                        if(territories.get(from).hasNeighbor(subEntry.getKey())){
+
+                            String to = subEntry.getKey();                      //Nach...
+                            int toX = (int)subEntry.getValue().capital.getLocation().x;
+                            int toY = (int)subEntry.getValue().capital.getLocation().y;
+
+                            if(from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                                g.drawLine(fromX,fromY,0,fromY);
+                                g.drawLine(toX,toY,1250,toY);
+                            }
+                            else{
+                                g.drawLine(fromX,fromY,toX,toY);
+                            }
+                        }
+                    }
+
+                }
+
+
 
                 for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
-                        g.drawPolygon(p);
+                        g.setColor(Color.LIGHT_GRAY);
+                        g.fillPolygon(p);
 
+                        g.setColor(Color.GREEN);
                         if(entry.getValue().occupied)
                             g.fillPolygon(p);
+                        g.setColor(Color.BLACK);
+                        g.drawPolygon(p);
                     }
                 }
+
+
+
             }
 
             @Override
@@ -104,6 +144,10 @@ public class GameMap {
             if (line.startsWith("capital-of")) {
 
                 createCapital(line);
+            }
+            if (line.startsWith("neighbors-of")){
+
+                createNeighbors(line);
             }
         }
 
@@ -192,6 +236,29 @@ public class GameMap {
 
     }
 
+    private void createNeighbors(String line){
+
+        line = line.replace("neighbors-of ", "");
+
+        String territory = line.substring(0,line.indexOf(':')-1);    //Name des Terretoriums
+        line = line.substring(line.indexOf(':') + 2);               //Name und Doppelpunkt wegstreichen
+
+        if (line.indexOf('-')>0) {
+
+            do {
+                territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
+                line = line.substring(line.indexOf('-') + 2);
+
+            } while (line.indexOf('-') > 0);
+            territories.get(territory).setNeighbor(line);
+        }
+        else{
+
+            territories.get(territory).setNeighbor(line);
+        }
+
+    }
+
     private void createContinent(String line){
 
 
@@ -201,6 +268,7 @@ public class GameMap {
 
         return continents;
     }
+
 
     private LinkedList<String> readMapFile(String path){
 

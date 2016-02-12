@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -11,7 +12,9 @@ public class OccupiedTerritory implements Territory{
     public Label capital = new Label("");
     private int armies;
     public boolean occupied = false;
+
     private LinkedList<Polygon> patches = new LinkedList<>();
+    private ArrayList<String> neighbors = new ArrayList<>();
 
     /**
      *
@@ -70,4 +73,20 @@ public class OccupiedTerritory implements Territory{
 
         this.occupied = occupied;
     }
+
+    public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
+
+        neighbors.add(s);
+    }
+
+    public ArrayList<String> getNeighbors(){    //gibt alle Nachbarn zurück
+
+        return neighbors;
+    }
+
+    public boolean hasNeighbor(String s){       //selbsterklärend... :)
+
+        return neighbors.contains(s);
+    }
+
 }
