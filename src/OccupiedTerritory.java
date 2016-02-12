@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by fabian on 15.01.16.
@@ -12,7 +11,7 @@ public class OccupiedTerritory implements Territory{
     public Label capital = new Label("");
     private int armies;
     public boolean occupied = false;
-    private List<Polygon> patches = new LinkedList<>();
+    private LinkedList<Polygon> patches = new LinkedList<>();
 
     /**
      *
@@ -52,7 +51,7 @@ public class OccupiedTerritory implements Territory{
         patches.add(patch);
     }
 
-    public List<Polygon> getPatches(){
+    public LinkedList<Polygon> getPatches(){
 
         return patches;
     }

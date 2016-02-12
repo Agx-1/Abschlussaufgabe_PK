@@ -15,16 +15,16 @@ import java.util.Scanner;
 
 public class GameMap {
 
-    Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
+    private Map<String, OccupiedTerritory> territories = new HashMap<String, OccupiedTerritory>();
+    private Map<String, Continent> continents = new HashMap<>();
 
-    JFrame mainMap;
+    private JFrame mainMap;
 
     public GameMap(String path){
 
         mainMap = new JFrame();
 
         mainMap.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        mainMap.setSize(1250, 650);
         mainMap.setResizable(false);
         mainMap.setVisible(true);
 
@@ -85,13 +85,14 @@ public class GameMap {
 
         createMap(readMapFile(path));
     }
+
     public void createMap(LinkedList<String> mapData) {
 
 //        just for debugging
         for (String line : mapData){
             System.out.println(line);
         }
-        //------------------
+//        ------------------
 
         for (String line : mapData){
 
@@ -111,7 +112,7 @@ public class GameMap {
 
     private void createPatch(String line){
 
-        //saves the name of the territory in current line (if present)
+        //saves the name of the territory in current line
         String territory;
 
         String[] helperCoordinates;
@@ -137,13 +138,6 @@ public class GameMap {
 
             try{
                 coordX[j] = Integer.parseInt(helperCoordinates[2*j]);
-            }
-            catch (NumberFormatException nfe) {}
-        }
-
-        for (int j = 0; j < coordY.length; j++) {
-
-            try{
                 coordY[j] = Integer.parseInt(helperCoordinates[2*j+1]);
             }
             catch (NumberFormatException nfe) {}
@@ -198,6 +192,16 @@ public class GameMap {
 
     }
 
+    private void createContinent(String line){
+
+
+    }
+
+    public Map<String, Continent> getContinents(){
+
+        return continents;
+    }
+
     private LinkedList<String> readMapFile(String path){
 
         LinkedList<String> result = new LinkedList<>();
@@ -210,6 +214,8 @@ public class GameMap {
 
                 result.add(s.nextLine());
             }
+
+            s.close();
         }
         catch (IOException e){
             System.out.println(".map file not found");
