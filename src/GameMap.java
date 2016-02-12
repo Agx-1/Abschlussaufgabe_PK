@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
+
 /**
  * Created by fabian on 15.01.16.
  */
@@ -18,6 +19,7 @@ public class GameMap {
 
     JFrame mainMap;
 
+
     public GameMap(String path){
 
         mainMap = new JFrame();
@@ -27,8 +29,19 @@ public class GameMap {
         mainMap.setBackground(new Color(50,60,250));
         mainMap.setResizable(false);
         mainMap.setVisible(true);
+        mainMap.setTitle("All Those Territories");
+
+        JLabel label = new JLabel("Test");
+        label.setText("1");
+        label.setAlignmentX(100);
+        label.setAlignmentY(100);
+
 
         JPanel p = new JPanel() {
+
+
+
+
 
 
             @Override
@@ -37,7 +50,7 @@ public class GameMap {
                 //super.paintComponent(g);      //maybe needed if some Component is ONLY added to JFrame
 
 
-                g.setColor(Color.BLACK);
+                g.setColor(Color.WHITE);
 
 
                 for (Map.Entry<String, OccupiedTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
@@ -92,7 +105,11 @@ public class GameMap {
             public Dimension getPreferredSize() {
                 return new Dimension(1250, 650);
             }
+
+
         };
+
+
 
         MouseAdapter ma = new MouseAdapter() {
 
@@ -113,14 +130,21 @@ public class GameMap {
                     }
                 }
 
+
+
                 mainMap.repaint();
             }
         };
 
         p.addMouseListener(ma);
 
+
         mainMap.add(p);
         mainMap.pack();
+        mainMap.add(label);
+
+
+
 
         createMap(readMapFile(path));
     }
