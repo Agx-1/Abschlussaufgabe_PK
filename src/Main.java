@@ -11,6 +11,6 @@ public class Main {
         TestingTerritory terr2 = new TestingTerritory(2);
 
         GameLogic.attack(terr1, terr2);
-        //System.out.println(gameMap.toString());
+        gameMap.setText("s");
     }
 }

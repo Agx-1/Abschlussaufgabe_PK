@@ -11,14 +11,10 @@ public class Territory implements VoidTerritory {
     public Label capital = new Label("");
     private int armies;
     public int occupied = -1;
-
     private LinkedList<Polygon> patches = new LinkedList<>();
     private ArrayList<String> neighbors = new ArrayList<>();
 
-    /**
-     *
-     * @param patch initial patch of land, which is part of the territory
-     */
+
     public Territory(String name, Polygon patch){
 
         this.name = name;
@@ -83,7 +79,7 @@ public class Territory implements VoidTerritory {
         return neighbors;
     }
 
-    public boolean hasNeighbor(String s){       //selbsterklärend... :)
+    public boolean hasNeighbor(String s){
 
         return neighbors.contains(s);
     }
