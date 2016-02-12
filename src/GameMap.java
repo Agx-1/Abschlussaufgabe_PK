@@ -13,7 +13,7 @@ import java.util.*;
 
 public class GameMap {
 
-    private Map<String, VoidTerritory> territories = new HashMap<String, VoidTerritory>();
+    private Map<String, Territory> territories = new HashMap<String, Territory>();
     private Map<String, Continent> continents = new HashMap<>();
 
     private JFrame mainMap;
@@ -40,7 +40,7 @@ public class GameMap {
                 g.setColor(Color.BLACK);
 
 
-                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
+                for (Map.Entry<String, Territory> entry : territories.entrySet()){  //Zeichnet linien zwischen den Capitals der Nachbarn
 
                     String from = entry.getKey();                               //Von...
                     int fromX = (int)entry.getValue().capital.getLocation().x;
@@ -48,7 +48,7 @@ public class GameMap {
 
 
 
-                    for (Map.Entry<String, VoidTerritory> subEntry : territories.entrySet()){
+                    for (Map.Entry<String, Territory> subEntry : territories.entrySet()){
                         if(territories.get(from).hasNeighbor(subEntry.getKey())){
 
                             String to = subEntry.getKey();                      //Nach...
@@ -69,7 +69,7 @@ public class GameMap {
 
 
 
-                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
@@ -101,7 +101,7 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()) {
+                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
                     for (Polygon p : entry.getValue().getPatches()) {
 
@@ -193,7 +193,7 @@ public class GameMap {
 
         } else{
 
-            territories.put(territory, new VoidTerritory(territory,
+            territories.put(territory, new Territory(territory,
                                                                 new Polygon(coordX, coordY, coordX.length)));
         }
     }
@@ -229,7 +229,7 @@ public class GameMap {
 
         } else{
 
-            territories.put(territory, new VoidTerritory(territory, capitalCoordinates));
+            territories.put(territory, new Territory(territory, capitalCoordinates));
         }
 
 
@@ -297,9 +297,9 @@ public class GameMap {
 
         String result = "";
 
-        for (Map.Entry<String, VoidTerritory> entry : territories.entrySet()){
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
-            result += "VoidTerritory <" +  entry.getKey() + ">\n     ";
+            result += "Territory <" +  entry.getKey() + ">\n     ";
             result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
                                     entry.getValue().capital.getLocation().y + "]\n     ";
             result += "patches: ";
