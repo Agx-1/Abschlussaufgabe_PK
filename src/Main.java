@@ -1,7 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
-import java.util.Map;
-
 /**
  * Created by fabian on 21.01.16.
  */
