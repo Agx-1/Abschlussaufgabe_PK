@@ -1,16 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
-
-
-
-/**
- * Created by fabian on 15.01.16.
- */
 
 public class GameMap {
 
@@ -30,7 +26,7 @@ public class GameMap {
         createMap(readMapFile(path));
 
         initCapital();
-
+        initButton();
     }
 
     public void createMap(LinkedList<String> mapData) {
@@ -101,8 +97,7 @@ public class GameMap {
 
         } else{
 
-            territories.put(territory, new Territory(territory,
-                                                                new Polygon(coordX, coordY, coordX.length)));
+            territories.put(territory, new Territory(territory, new Polygon(coordX, coordY, coordX.length)));
         }
     }
 
@@ -144,24 +139,27 @@ public class GameMap {
     }
 
     private void createNeighbors(String line){
-
         line = line.replace("neighbors-of ", "");
 
-        String territory = line.substring(0,line.indexOf(':')-1);    //Name des Terretoriums
+        String territory = line.substring(0,line.indexOf(':')-1);   //Name des Terretoriums
+
         line = line.substring(line.indexOf(':') + 2);               //Name und Doppelpunkt wegstreichen
 
         if (line.indexOf('-')>0) {
 
             do {
                 territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
+                territories.get(line.substring(0, line.indexOf('-') - 1)).setNeighbor(territory);
                 line = line.substring(line.indexOf('-') + 2);
 
             } while (line.indexOf('-') > 0);
             territories.get(territory).setNeighbor(line);
+            territories.get(line).setNeighbor(territory);
         }
         else{
 
             territories.get(territory).setNeighbor(line);
+            territories.get(line).setNeighbor(territory);
         }
 
     }
@@ -177,6 +175,7 @@ public class GameMap {
     }
 
     public void setText(String s){                                               //unfinished
+        System.out.println("\n ANGEKOMMEN \n");
         for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
             /*
@@ -220,17 +219,21 @@ public class GameMap {
         return result;
     }
 
-    private void initCapital() {
+    public void initCapital() {
 
         //Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Soll vorerst bei jedem Capital "1" anzeigen
 
-            String from = entry.getKey();
+             String from = entry.getKey();
             int x = entry.getValue().capital.getLocation().x;
             int y = entry.getValue().capital.getLocation().y;
 
-            JLabel label = new JLabel("1");
+            if (from.equals("Alaska")){                                          //Test
+                entry.getValue().addReinforcement();
+            }
+
+            JLabel label = new JLabel(Integer.toString(entry.getValue().getArmies()));
             mainMapPanel.add(label);
 
             label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -244,13 +247,33 @@ public class GameMap {
         }
     }
 
+    public void initButton(){
+
+        JButton b = new JButton("end this round");
+        mainMapPanel.add(b);
+
+        b.setSize(150,30);
+        b.setLocation(1080,600);
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setBackground(Color.LIGHT_GRAY);
+
+        b.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,"You have ended the round.");
+                //TODO
+            }
+        });
+
+    }
+
     private void initMainMapFrame(){
 
         mainMapFrame = new JFrame();
 
         mainMapFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainMapFrame.setSize(1250, 650);
-        mainMapFrame.setBackground(new Color(50, 60, 250));
+        mainMapFrame.setBackground(new Color(0,153,204));
         mainMapFrame.setResizable(false);
         mainMapFrame.setVisible(true);
         mainMapFrame.setTitle("All Those Territories");
@@ -301,7 +324,7 @@ public class GameMap {
                         g.setColor(Color.LIGHT_GRAY);
                         g.fillPolygon(p);
 
-                        g.setColor(Color.GREEN);
+                        g.setColor(new Color(10,180,30));
                         if (entry.getValue().occupied >= 0)
                             g.fillPolygon(p);
                         g.setColor(Color.BLACK);
