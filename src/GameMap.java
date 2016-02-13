@@ -308,8 +308,16 @@ public class GameMap {
                             if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
                                 g.drawLine(fromX, fromY, 0, fromY);
                                 g.drawLine(toX, toY, 1250, toY);
-                            } else {
-                                g.drawLine(fromX, fromY, toX, toY);
+                            }
+
+                            else {
+                                if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                                    g.drawLine(fromX,fromY,1250,fromY);
+                                    g.drawLine(toX,toY,0,toY);
+                                }
+                                else{
+                                    g.drawLine(fromX, fromY, toX, toY);
+                                }
                             }
                         }
                     }
