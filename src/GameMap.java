@@ -27,13 +27,14 @@ public class GameMap {
 
         initCapital();
         initButton();
+        initTextField("Alles mögliche kann hier geschrieben werden");
     }
 
     public void createMap(LinkedList<String> mapData) {
 
 //        just for debugging
         for (String line : mapData){
-            System.out.println(line);
+            //System.out.println(line);
         }
 //        ------------------
 
@@ -242,6 +243,7 @@ public class GameMap {
             label.setFont(new Font("Arial", Font.BOLD, 14));
             label.setSize(20, 20);
             label.setLocation(x-label.getWidth()/2, y-label.getHeight()/2);
+            label.setForeground(Color.BLACK);
             //label.setBorder(border);                  //shows the position of the Label
 
         }
@@ -256,6 +258,7 @@ public class GameMap {
         b.setLocation(1080,600);
         b.setFont(new Font("Arial", Font.BOLD, 14));
         b.setBackground(Color.LIGHT_GRAY);
+        b.setForeground(Color.BLACK);
 
         b.addActionListener(new ActionListener() {
             @Override
@@ -265,6 +268,17 @@ public class GameMap {
             }
         });
 
+    }
+
+    public void initTextField(String s){
+        JLabel textField = new JLabel(s);
+        mainMapPanel.add(textField);
+
+        textField.setFont(new Font("Arial", Font.PLAIN, 18));
+        textField.setSize(500, 30);
+        textField.setLocation(450,600);
+        textField.setText(s);
+        textField.setForeground(Color.BLACK);
     }
 
     private void initMainMapFrame(){
@@ -347,7 +361,6 @@ public class GameMap {
             public Dimension getPreferredSize() {
                 return new Dimension(1250, 650);
             }
-
 
         };
         mainMapPanel.setLayout(null);
