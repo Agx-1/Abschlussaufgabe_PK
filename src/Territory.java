@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -8,9 +9,9 @@ import java.util.LinkedList;
 public class Territory implements VoidTerritory {
 
     private final String name;
-    public Label capital = new Label("");
+    public JLabel capital = new JLabel("");
     private int armies;
-    public int occupied = -1;
+    private int occupied = -1;
     private LinkedList<Polygon> patches = new LinkedList<>();
     private ArrayList<String> neighbors = new ArrayList<>();
 
@@ -56,17 +57,19 @@ public class Territory implements VoidTerritory {
 
     public void addCapital(int[] capitalCoordinates){
 
-        if (this.capital.getText() == ""){
-
-            this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-            capital.setText("0");
-            capital.setVisible(true);
-        }
+        this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+        capital.setText("42");
+        capital.setVisible(true);
     }
 
     public void setOccupied(int occupied){
 
         this.occupied = occupied;
+    }
+
+    public int getOccupied(){
+
+        return occupied;
     }
 
     public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt

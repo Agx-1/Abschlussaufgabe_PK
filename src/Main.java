@@ -8,7 +8,10 @@ public class Main {
     public static void main(String[] args) {
 
         GameMap gameMap = new GameMap("maps/world.map");
-        
+
+        GameLogic.startOccupyingPhase();
+
+
         TestingTerritory terr1 = new TestingTerritory(4);
         TestingTerritory terr2 = new TestingTerritory(2);
 

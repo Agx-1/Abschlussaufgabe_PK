@@ -25,89 +25,11 @@ public class GameMap {
         initMainMapFrame();
         initMainMapPanel();
 
-        claimPhase(path);
-        normalRound();
+        createMap(readMapFile(path));
 
-    }
-
-    public class Territory implements VoidTerritory {
-
-        private final String name;
-        public Label capital = new Label("");
-        private int armies;
-        public int occupied = -1;
-        private LinkedList<Polygon> patches = new LinkedList<>();
-        private ArrayList<String> neighbors = new ArrayList<>();
-
-
-        public Territory(String name, Polygon patch){
-
-            this.name = name;
-            patches.add(patch);
-        }
-
-        public Territory(String name, int[] capitalCoordinates){
-
-            this.name = name;
-            this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-        }
-
-        public int getArmies(){
-
-            return armies;
-        }
-
-        public void removeArmy(){
-
-            armies--;
-            capital.setText(Integer.toString(armies));
-        }
-
-        public void addReinforcement(){
-
-            armies++;
-            capital.setText(Integer.toString(armies));
-        }
-
-        public void addPatch(Polygon patch){
-
-            patches.add(patch);
-        }
-
-        public LinkedList<Polygon> getPatches(){
-
-            return patches;
-        }
-
-        public void addCapital(int[] capitalCoordinates){
-
-            if (this.capital.getText() == ""){
-
-                this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-                capital.setText("0");
-                capital.setVisible(true);
-            }
-        }
-
-        public void setOccupied(int occupied){
-
-            this.occupied = occupied;
-        }
-
-        public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
-
-            neighbors.add(s);
-        }
-
-        public ArrayList<String> getNeighbors(){    //gibt alle Nachbarn zurück
-
-            return neighbors;
-        }
-
-        public boolean hasNeighbor(String s){
-
-            return neighbors.contains(s);
-        }
+        initCapital();
+//        claimPhase(path);
+//        normalRound();
 
     }
 
@@ -304,16 +226,17 @@ public class GameMap {
             int x = entry.getValue().capital.getLocation().x;
             int y = entry.getValue().capital.getLocation().y;
 
-            JLabel label = new JLabel(Integer.toString(entry.getValue().getArmies()));
-            mainMapPanel.add(label);
+            entry.getValue().capital = new JLabel(Integer.toString(entry.getValue().getArmies()));
+            mainMapPanel.add(entry.getValue().capital);
 
-            label.setHorizontalAlignment(SwingConstants.CENTER);
-            label.setVerticalAlignment(SwingConstants.CENTER);
+            entry.getValue().capital.setHorizontalAlignment(SwingConstants.CENTER);
+            entry.getValue().capital.setVerticalAlignment(SwingConstants.CENTER);
 
-            label.setFont(new Font("Arial", Font.BOLD, 14));
-            label.setSize(20, 20);
-            label.setLocation(x-label.getWidth()/2, y-label.getHeight()/2);
-            label.setForeground(Color.BLACK);
+            entry.getValue().capital.setFont(new Font("Arial", Font.BOLD, 14));
+            entry.getValue().capital.setSize(20, 20);
+            entry.getValue().capital.setLocation(x-entry.getValue().capital.getWidth()/2,
+                                                 y-entry.getValue().capital.getHeight()/2);
+            entry.getValue().capital.setForeground(Color.BLACK);
             //label.setBorder(border);                  //shows the position of the Label
 
         }
@@ -421,11 +344,11 @@ public class GameMap {
                         g.fillPolygon(p);
 
 
-                        if (entry.getValue().occupied == 0){
+                        if (entry.getValue().getOccupied() == 0){
                             g.setColor(new Color(194,0,0));
                             g.fillPolygon(p);
                         }
-                        if (entry.getValue().occupied == 1){
+                        if (entry.getValue().getOccupied() == 1){
                             g.setColor(new Color(10,180,30));
                             g.fillPolygon(p);
                         }
@@ -452,20 +375,41 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+                if(GameLogic.phase == 0){
 
-                    for (Polygon p : entry.getValue().getPatches()) {
+                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
-                        if (p.contains(me.getPoint())) {
+                        for (Polygon p : entry.getValue().getPatches()) {
 
-                            //System.out.println("Clicked polygon");  //debugging only
-                            entry.getValue().setOccupied(1);
+                            if (p.contains(me.getPoint()) && entry.getValue().getOccupied() == -1) {
 
+                                //System.out.println("Clicked polygon");  //debugging only
+                                entry.getValue().setOccupied(GameLogic.round % GameLogic.playerCount);
+                                entry.getValue().addReinforcement();
+                                entry.getValue().capital.setText("" + entry.getValue().getArmies());
+
+                                GameLogic.occupiedTerritories++;
+                                GameLogic.round++;
+                                GameLogic.currentPlayer = GameLogic.round % GameLogic.playerCount;
+
+                                if(territories.size() == GameLogic.occupiedTerritories){
+
+                                    GameLogic.phase = 1;
+                                    return;
+                                }
+                            }
                         }
                     }
+
+                    mainMapFrame.repaint();
+
                 }
 
-                mainMapFrame.repaint();
+                if(GameLogic.phase == 1){
+
+                    initTextField("Verstärkungsphase","Verteile deine Armeen");
+                    initButton();
+                }
             }
         };
 
@@ -518,7 +462,7 @@ public class GameMap {
 
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-            if (entry.getValue().occupied >= 0){
+            if (entry.getValue().getOccupied() >= 0){
                 count++;
             }
             if (count == 5){
