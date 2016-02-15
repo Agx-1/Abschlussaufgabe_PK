@@ -309,29 +309,26 @@ public class GameMap {
                 for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
 
                     String from = entry.getKey();                                       //Von...
-                    int fromX = (int) entry.getValue().capital.getLocation().x;
-                    int fromY = (int) entry.getValue().capital.getLocation().y;
+                    int fromX = entry.getValue().capital.getLocation().x;
+                    int fromY = entry.getValue().capital.getLocation().y;
 
-                    for (Map.Entry<String, Territory> subEntry : territories.entrySet()) {
-                        if (territories.get(from).hasNeighbor(subEntry.getKey())) {
+                    for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
 
-                            String to = subEntry.getKey();                              //Nach...
-                            int toX = (int) subEntry.getValue().capital.getLocation().x;
-                            int toY = (int) subEntry.getValue().capital.getLocation().y;
+                        String to = entry.getValue().getNeighbors().get(i);                              //Nach...
+                        int toX = territories.get(to).capital.getLocation().x;
+                        int toY = territories.get(to).capital.getLocation().y;
 
-                            if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-                                g.drawLine(fromX, fromY, 0, fromY);
-                                g.drawLine(toX, toY, 1250, toY);
+                        if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                            g.drawLine(fromX, fromY, 0, fromY);
+                            g.drawLine(toX, toY, 1250, toY);
+                        }
+                        else {
+                            if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                                g.drawLine(fromX,fromY,1250,fromY);
+                                g.drawLine(toX,toY,0,toY);
                             }
-
-                            else {
-                                if (from.equals("Kamchatka") && to.equals("Alaska")) {
-                                    g.drawLine(fromX,fromY,1250,fromY);
-                                    g.drawLine(toX,toY,0,toY);
-                                }
-                                else{
-                                    g.drawLine(fromX, fromY, toX, toY);
-                                }
+                            else{
+                                g.drawLine(fromX, fromY, toX, toY);
                             }
                         }
                     }
