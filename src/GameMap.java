@@ -15,7 +15,6 @@ public class GameMap {
 
     private JFrame mainMapFrame;
     private JPanel mainMapPanel;
-    private MouseAdapter ma;
 
     JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
     JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
@@ -31,11 +30,92 @@ public class GameMap {
 
     }
 
+    public class Territory implements VoidTerritory {
+
+        private final String name;
+        public Label capital = new Label("");
+        private int armies;
+        public int occupied = -1;
+        private LinkedList<Polygon> patches = new LinkedList<>();
+        private ArrayList<String> neighbors = new ArrayList<>();
+
+
+        public Territory(String name, Polygon patch){
+
+            this.name = name;
+            patches.add(patch);
+        }
+
+        public Territory(String name, int[] capitalCoordinates){
+
+            this.name = name;
+            this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+        }
+
+        public int getArmies(){
+
+            return armies;
+        }
+
+        public void removeArmy(){
+
+            armies--;
+            capital.setText(Integer.toString(armies));
+        }
+
+        public void addReinforcement(){
+
+            armies++;
+            capital.setText(Integer.toString(armies));
+        }
+
+        public void addPatch(Polygon patch){
+
+            patches.add(patch);
+        }
+
+        public LinkedList<Polygon> getPatches(){
+
+            return patches;
+        }
+
+        public void addCapital(int[] capitalCoordinates){
+
+            if (this.capital.getText() == ""){
+
+                this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+                capital.setText("0");
+                capital.setVisible(true);
+            }
+        }
+
+        public void setOccupied(int occupied){
+
+            this.occupied = occupied;
+        }
+
+        public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
+
+            neighbors.add(s);
+        }
+
+        public ArrayList<String> getNeighbors(){    //gibt alle Nachbarn zurück
+
+            return neighbors;
+        }
+
+        public boolean hasNeighbor(String s){
+
+            return neighbors.contains(s);
+        }
+
+    }
+
     public void createMap(LinkedList<String> mapData) {
 
 //        just for debugging
         for (String line : mapData){
-            //System.out.println(line);
+            System.out.println(line);
         }
 //        ------------------
 
@@ -147,23 +227,16 @@ public class GameMap {
 
         line = line.substring(line.indexOf(':') + 2);               //Name und Doppelpunkt wegstreichen
 
-        if (line.indexOf('-')>0) {
+        while (line.indexOf('-') > 0) {
 
-            do {
-                territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
-                territories.get(line.substring(0, line.indexOf('-') - 1)).setNeighbor(territory);
-                line = line.substring(line.indexOf('-') + 2);
+            territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
+            territories.get(line.substring(0, line.indexOf('-') - 1)).setNeighbor(territory);
+            line = line.substring(line.indexOf('-') + 2);
 
-            } while (line.indexOf('-') > 0);
-            territories.get(territory).setNeighbor(line);
-            territories.get(line).setNeighbor(territory);
-        }
-        else{
-
-            territories.get(territory).setNeighbor(line);
-            territories.get(line).setNeighbor(territory);
         }
 
+        territories.get(territory).setNeighbor(line);
+        territories.get(line).setNeighbor(territory);
     }
 
     private void createContinent(String line){
@@ -372,17 +445,7 @@ public class GameMap {
         };
         mainMapPanel.setLayout(null);
 
-        initMouseAdapter();
-
-        mainMapPanel.addMouseListener(ma);
-
-        mainMapFrame.add(mainMapPanel);
-        mainMapFrame.pack();
-    }
-
-    private void initMouseAdapter(){
-
-        ma = new MouseAdapter() {
+        MouseAdapter ma = new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent me) {
@@ -405,6 +468,11 @@ public class GameMap {
                 mainMapFrame.repaint();
             }
         };
+
+        mainMapPanel.addMouseListener(ma);
+
+        mainMapFrame.add(mainMapPanel);
+        mainMapFrame.pack();
     }
 
     @Override
@@ -465,4 +533,3 @@ public class GameMap {
         initButton();
     }
 }
-
