@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -218,13 +219,14 @@ public class GameMap {
 
     public void initCapital() {
 
-        //Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
+//        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
             String from = entry.getKey();
             int x = entry.getValue().capital.getLocation().x;
             int y = entry.getValue().capital.getLocation().y;
+
 
             entry.getValue().capital = new JLabel(Integer.toString(entry.getValue().getArmies()));
             mainMapPanel.add(entry.getValue().capital);
@@ -237,9 +239,13 @@ public class GameMap {
             entry.getValue().capital.setLocation(x-entry.getValue().capital.getWidth()/2,
                                                  y-entry.getValue().capital.getHeight()/2);
             entry.getValue().capital.setForeground(Color.BLACK);
-            //label.setBorder(border);                  //shows the position of the Label
+
+
+//            entry.getValue().capital.setBorder(border);                  //shows the position of the Label
 
         }
+
+        mainMapFrame.repaint();
     }
 
     public void initButton(){
@@ -312,23 +318,29 @@ public class GameMap {
                     int fromX = entry.getValue().capital.getLocation().x;
                     int fromY = entry.getValue().capital.getLocation().y;
 
-                    for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
+                    if(!(fromX == 0 && fromY == 0))
+                    {
+                        for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
 
-                        String to = entry.getValue().getNeighbors().get(i);                              //Nach...
-                        int toX = territories.get(to).capital.getLocation().x;
-                        int toY = territories.get(to).capital.getLocation().y;
+                            String to = entry.getValue().getNeighbors().get(i);                              //Nach...
+                            int toX = territories.get(to).capital.getLocation().x;
+                            int toY = territories.get(to).capital.getLocation().y;
 
-                        if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-                            g.drawLine(fromX, fromY, 0, fromY);
-                            g.drawLine(toX, toY, 1250, toY);
-                        }
-                        else {
-                            if (from.equals("Kamchatka") && to.equals("Alaska")) {
-                                g.drawLine(fromX,fromY,1250,fromY);
-                                g.drawLine(toX,toY,0,toY);
-                            }
-                            else{
-                                g.drawLine(fromX, fromY, toX, toY);
+                            if(!(toX == 0 && toY == 0)){
+
+                                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                                    g.drawLine(fromX, fromY, 0, fromY);
+                                    g.drawLine(toX, toY, 1250, toY);
+                                }
+                                else {
+                                    if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                                        g.drawLine(fromX,fromY,1250,fromY);
+                                        g.drawLine(toX,toY,0,toY);
+                                    }
+                                    else{
+                                        g.drawLine(fromX, fromY, toX, toY);
+                                    }
+                                }
                             }
                         }
                     }
@@ -375,7 +387,7 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                if(GameLogic.phase == 0){
+                if(GameLogic.phase == 0){       //occupy Territories
 
                     for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
@@ -395,20 +407,18 @@ public class GameMap {
                                 if(territories.size() == GameLogic.occupiedTerritories){
 
                                     GameLogic.phase = 1;
-                                    return;
                                 }
                             }
                         }
                     }
 
-                    mainMapFrame.repaint();
+                } else{
 
-                }
+                    if(GameLogic.phase == 1){
 
-                if(GameLogic.phase == 1){
-
-                    initTextField("Verstärkungsphase","Verteile deine Armeen");
-                    initButton();
+                        initTextField("Verstärkungsphase","Verteile deine Armeen");
+                        initButton();
+                    }
                 }
             }
         };

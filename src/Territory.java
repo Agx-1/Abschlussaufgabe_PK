@@ -58,8 +58,7 @@ public class Territory implements VoidTerritory {
     public void addCapital(int[] capitalCoordinates){
 
         this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-        capital.setText("42");
-        capital.setVisible(true);
+        capital.setText("0");
     }
 
     public void setOccupied(int occupied){
