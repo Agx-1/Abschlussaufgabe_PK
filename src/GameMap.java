@@ -219,7 +219,7 @@ public class GameMap {
 
     public void initCapital() {
 
-//        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
+        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
@@ -241,7 +241,7 @@ public class GameMap {
             entry.getValue().capital.setForeground(Color.BLACK);
 
 
-//            entry.getValue().capital.setBorder(border);                  //shows the position of the Label
+            entry.getValue().capital.setBorder(border);                  //shows the position of the Label
 
         }
 
