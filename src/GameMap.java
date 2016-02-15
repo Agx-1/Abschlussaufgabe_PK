@@ -446,12 +446,18 @@ public class GameMap {
     }
 
     private boolean checkClaimPhase(){
-        try {
-            Thread.sleep(2000);                 //1000 milliseconds is one second.
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
+        int count = 0;
+
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+            if (entry.getValue().occupied >= 0){
+                count++;
+            }
+            if (count == 5){
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     private void normalRound(){
