@@ -17,17 +17,18 @@ public class GameMap {
     private JPanel mainMapPanel;
     private MouseAdapter ma;
 
+    JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
+    JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
+
 
     public GameMap(String path) {
 
         initMainMapFrame();
         initMainMapPanel();
 
-        createMap(readMapFile(path));
+        claimPhase(path);
+        normalRound();
 
-        initCapital();
-        initButton();
-        initTextField("Alles mögliche kann hier geschrieben werden");
     }
 
     public void createMap(LinkedList<String> mapData) {
@@ -224,15 +225,11 @@ public class GameMap {
 
         //Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Soll vorerst bei jedem Capital "1" anzeigen
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
-             String from = entry.getKey();
+            String from = entry.getKey();
             int x = entry.getValue().capital.getLocation().x;
             int y = entry.getValue().capital.getLocation().y;
-
-            if (from.equals("Alaska")){                                          //Test
-                entry.getValue().addReinforcement();
-            }
 
             JLabel label = new JLabel(Integer.toString(entry.getValue().getArmies()));
             mainMapPanel.add(label);
@@ -257,8 +254,8 @@ public class GameMap {
         b.setSize(150,30);
         b.setLocation(1080,600);
         b.setFont(new Font("Arial", Font.BOLD, 14));
-        b.setBackground(Color.LIGHT_GRAY);
-        b.setForeground(Color.BLACK);
+        b.setBackground(new Color(0,0,102));
+        b.setForeground(Color.WHITE);
 
         b.addActionListener(new ActionListener() {
             @Override
@@ -270,15 +267,22 @@ public class GameMap {
 
     }
 
-    public void initTextField(String s){
-        JLabel textField = new JLabel(s);
-        mainMapPanel.add(textField);
+    public void initTextField(String phase, String instruction){
 
-        textField.setFont(new Font("Arial", Font.PLAIN, 18));
-        textField.setSize(500, 30);
-        textField.setLocation(450,600);
-        textField.setText(s);
-        textField.setForeground(Color.BLACK);
+        mainMapPanel.add(labelPhase);
+        mainMapPanel.add(labelInstr);
+
+        labelPhase.setText(phase);
+        labelPhase.setFont(new Font("Arial", Font.BOLD, 20));
+        labelPhase.setSize(500, 30);
+        labelPhase.setLocation(400,570);
+        labelPhase.setForeground(Color.BLACK);
+
+        labelInstr.setText(instruction);
+        labelInstr.setFont(new Font("Arial", Font.PLAIN, 17));
+        labelInstr.setSize(700,30);
+        labelInstr.setLocation(300,600);
+        labelInstr.setForeground(Color.BLACK);
     }
 
     private void initMainMapFrame(){
@@ -343,9 +347,15 @@ public class GameMap {
                         g.setColor(Color.LIGHT_GRAY);
                         g.fillPolygon(p);
 
-                        g.setColor(new Color(10,180,30));
-                        if (entry.getValue().occupied >= 0)
+
+                        if (entry.getValue().occupied == 0){
+                            g.setColor(new Color(194,0,0));
                             g.fillPolygon(p);
+                        }
+                        if (entry.getValue().occupied == 1){
+                            g.setColor(new Color(10,180,30));
+                            g.fillPolygon(p);
+                        }
                         g.setColor(Color.BLACK);
                         g.drawPolygon(p);
                     }
@@ -386,7 +396,8 @@ public class GameMap {
                         if (p.contains(me.getPoint())) {
 
                             //System.out.println("Clicked polygon");  //debugging only
-                            entry.getValue().setOccupied(0);
+                            entry.getValue().setOccupied(1);
+
                         }
                     }
                 }
@@ -404,9 +415,10 @@ public class GameMap {
         for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
             result += "Territory <" +  entry.getKey() + ">\n     ";
-            result += "capital: [" + entry.getValue().capital.getLocation().x + ", " +
+            result += "capital:   [" + entry.getValue().capital.getLocation().x + ", " +
                                     entry.getValue().capital.getLocation().y + "]\n     ";
-            result += "patches: ";
+            result += "neighbors: " + entry.getValue().getNeighbors() +  "\n     ";
+            result += "patches:   ";
 
             for (Polygon p : entry.getValue().getPatches()){
 
@@ -416,13 +428,35 @@ public class GameMap {
                     result += "[" + p.xpoints[i] + ";";
                     result +=       p.ypoints[i] + "], ";
                 }
-                result += " }" + "\n              ";
+                result += " }" + "\n                ";
             }
 
             result += "\n";
         }
 
         return  result;
+    }
+
+    private void claimPhase(String path){
+        createMap(readMapFile(path));
+        initCapital();
+        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
+        while(checkClaimPhase()){}
+
+    }
+
+    private boolean checkClaimPhase(){
+        try {
+            Thread.sleep(2000);                 //1000 milliseconds is one second.
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        return false;
+    }
+
+    private void normalRound(){
+        initTextField("Verstärkungsphase","Verteile deine Armeen");
+        initButton();
     }
 }
 

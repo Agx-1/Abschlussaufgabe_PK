@@ -1,3 +1,5 @@
+import java.util.Map;
+
 /**
  * Created by fabian on 21.01.16.
  */
@@ -10,7 +12,8 @@ public class Main {
         TestingTerritory terr1 = new TestingTerritory(4);
         TestingTerritory terr2 = new TestingTerritory(2);
 
-        GameLogic.attack(terr1, terr2);
-        gameMap.setText("s");
+        System.out.println(gameMap.toString());
+
+
     }
 }
