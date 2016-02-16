@@ -17,8 +17,8 @@ public class GameMap {
     private JPanel mainMapPanel;
     private MouseAdapter ma;
 
-    JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
-    JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
+    private JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
+    private JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
 
 
     public GameMap(String path) {
@@ -453,7 +453,7 @@ public class GameMap {
             if (entry.getValue().occupied >= 0){
                 count++;
             }
-            if (count == 5){
+            if (count == 42){
                 return false;
             }
         }
