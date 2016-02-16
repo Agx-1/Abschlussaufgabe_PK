@@ -10,8 +10,10 @@ import java.util.*;
 
 public class GameMap {
 
-    private Map<String, Territory> territories = new HashMap<String, Territory>();
+    private Map<String, Territory> territories = new HashMap<>();
     private Map<String, Continent> continents = new HashMap<>();
+
+    private int reinforcements = 0;
 
     private JFrame mainMapFrame;
     private JPanel mainMapPanel;
@@ -168,33 +170,6 @@ public class GameMap {
 
     }
 
-    public Map<String, Continent> getContinents(){
-
-        return continents;
-    }
-
-    public void setText(String s){                                               //unfinished
-        System.out.println("\n ANGEKOMMEN \n");
-        for (Map.Entry<String, Territory> entry : territories.entrySet()){
-
-            /*
-            String from = entry.getKey();
-
-            int x = (int)entry.getValue().capital.getLocation().x;
-            int y = (int)entry.getValue().capital.getLocation().y;
-            System.out.println("x = " + x + ", y = " + y);
-
-            JLabel label = new JLabel("1");
-            mainMapPanel.add(label);
-            label.setBounds(new Rectangle(new Point(74-10,72-10),label.getPreferredSize()));
-            label.setFont(new Font("Arial",Font.BOLD,15));
-            label.setSize(20,20);
-             */
-
-            //System.out.println((String)entry.getKey());
-        }
-    }
-
     private LinkedList<String> readMapFile(String path){
 
         LinkedList<String> result = new LinkedList<>();
@@ -305,6 +280,14 @@ public class GameMap {
         labelInstr.setForeground(Color.BLACK);
     }
 
+    public void setTextField(String phase, String instruction){
+
+        labelPhase.setText(phase);
+        labelInstr.setText(instruction);
+
+        mainMapPanel.repaint();
+    }
+
     private void initMainMapFrame(){
 
         mainMapFrame = new JFrame();
@@ -387,9 +370,6 @@ public class GameMap {
 
                     mainMapPanel.repaint();
 
-                } else {
-
-                    System.out.println("Still loading map, please wait...");
                 }
             }
 
@@ -401,6 +381,14 @@ public class GameMap {
         };
         mainMapPanel.setLayout(null);
 
+        initMouseAdapter();
+
+        mainMapFrame.add(mainMapPanel);
+        mainMapFrame.pack();
+    }
+
+    private void initMouseAdapter(){
+
         MouseAdapter ma = new MouseAdapter() {
 
             @Override
@@ -410,43 +398,17 @@ public class GameMap {
 
                 if(GameLogic.phase == 0){       //occupy Territories
 
-                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-
-                        for (Polygon p : entry.getValue().getPatches()) {
-
-                            if (p.contains(me.getPoint()) && entry.getValue().getOccupied() == -1) {
-
-                                //System.out.println("Clicked polygon");  //debugging only
-                                entry.getValue().setOccupied(GameLogic.move % GameLogic.playerCount);
-                                entry.getValue().addReinforcement();
-                                entry.getValue().labelCapital.setText("" + entry.getValue().getArmies());
-
-                                GameLogic.occupiedTerritories++;
-                                GameLogic.move++;
-                                GameLogic.currentPlayer = GameLogic.move % GameLogic.playerCount;
-
-                                if(territories.size() == GameLogic.occupiedTerritories){
-
-                                    GameLogic.phase = 1;
-                                }
-                            }
-                        }
-                    }
-
+                    claimPhase(me);
                 }
 
                 if(GameLogic.phase == 1){
 
-                    initTextField("Verstärkungsphase","Verteile deine Armeen");
-                    initButton();
+                    normalRound();
                 }
             }
         };
 
         mainMapPanel.addMouseListener(ma);
-
-        mainMapFrame.add(mainMapPanel);
-        mainMapFrame.pack();
     }
 
     @Override
@@ -479,14 +441,6 @@ public class GameMap {
         return  result;
     }
 
-    private void claimPhase(String path){
-        createMap(readMapFile(path));
-        initCapital();
-        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
-        while(checkClaimPhase()){}
-
-    }
-
     private boolean checkClaimPhase(){
         int count = 0;
 
@@ -503,7 +457,67 @@ public class GameMap {
     }
 
     private void normalRound(){
-        initTextField("Verstärkungsphase","Verteile deine Armeen");
-        initButton();
+
+        calculateReinforcements();
+    }
+
+    private void claimPhase(MouseEvent me){
+
+        initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+
+            for (Polygon p : entry.getValue().getPatches()) {
+
+                if (p.contains(me.getPoint()) && entry.getValue().getOccupied() == -1) {
+
+                    //System.out.println("Clicked polygon");  //debugging only
+                    entry.getValue().setOccupied(GameLogic.move % GameLogic.playerCount);
+                    entry.getValue().addReinforcement();
+                    entry.getValue().labelCapital.setText("" + entry.getValue().getArmies());
+
+                    GameLogic.occupiedTerritories++;
+                    GameLogic.move++;
+                    GameLogic.currentPlayer = GameLogic.move % GameLogic.playerCount;
+
+                    if(territories.size() == GameLogic.occupiedTerritories){
+
+                        GameLogic.phase = 1;
+                        setTextField("Verstärkungsphase","Verteile deine Armeen");
+                        initButton();
+                    }
+                }
+            }
+        }
+    }
+
+    private void claimPhase(String path){
+        createMap(readMapFile(path));
+        initCapital();
+        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
+        while(checkClaimPhase()){}
+
+    }
+
+    private void calculateReinforcements(){
+
+        for(Map.Entry<String, Continent> entry : continents.entrySet()){
+
+            boolean continentBonus = true;
+
+            for (VoidTerritory territory : entry.getValue().territories){
+
+                if(!(territory.getOccupied() == GameLogic.currentPlayer)){
+
+                    continentBonus = false;
+                }
+            }
+
+            if(continentBonus){
+
+                reinforcements += entry.getValue().reinforcementBonus;
+                System.out.println("Reinforcements: " + reinforcements);
+            }
+        }
     }
 }

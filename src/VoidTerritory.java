@@ -14,4 +14,6 @@ public interface VoidTerritory {
     //increase the number of armies in current territory by 1
     void addReinforcement();
 
+    int getOccupied();
+
 }

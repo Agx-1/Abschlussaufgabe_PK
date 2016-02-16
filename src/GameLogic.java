@@ -112,11 +112,6 @@ public class GameLogic {        //class is probably obsolete, remove if finished
 
     }
 
-    public static void startOccupyingPhase(){
-
-
-    }
-
     private static int rollDice(){
 
         return ((int)(Math.random()*6))%6 + 1;      //tested and approved

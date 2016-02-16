@@ -26,4 +26,9 @@ public class TestingTerritory implements VoidTerritory {
 
         armies++;
     }
+
+    public int getOccupied(){
+
+        return 0;
+    }
 }
