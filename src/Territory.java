@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -8,9 +9,10 @@ import java.util.LinkedList;
 public class Territory implements VoidTerritory {
 
     private final String name;
-    public Label capital = new Label("");
+    private Point capital;
+    public JLabel labelCapital = new JLabel();
     private int armies;
-    public int occupied = -1;
+    private int occupied = -1;
     private LinkedList<Polygon> patches = new LinkedList<>();
     private ArrayList<String> neighbors = new ArrayList<>();
 
@@ -24,7 +26,7 @@ public class Territory implements VoidTerritory {
     public Territory(String name, int[] capitalCoordinates){
 
         this.name = name;
-        this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+        this.capital = new Point(capitalCoordinates[0], capitalCoordinates[1]);
     }
 
     public int getArmies(){
@@ -35,13 +37,13 @@ public class Territory implements VoidTerritory {
     public void removeArmy(){
 
         armies--;
-        capital.setText(Integer.toString(armies));
+        labelCapital.setText(Integer.toString(armies));
     }
 
     public void addReinforcement(){
 
         armies++;
-        capital.setText(Integer.toString(armies));
+        labelCapital.setText(Integer.toString(armies));
     }
 
     public void addPatch(Polygon patch){
@@ -56,17 +58,18 @@ public class Territory implements VoidTerritory {
 
     public void addCapital(int[] capitalCoordinates){
 
-        if (this.capital.getText() == ""){
-
-            this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-            capital.setText("0");
-            capital.setVisible(true);
-        }
+        capital = new Point(capitalCoordinates[0], capitalCoordinates[1]);
+        labelCapital.setText("0");
     }
 
     public void setOccupied(int occupied){
 
         this.occupied = occupied;
+    }
+
+    public int getOccupied(){
+
+        return occupied;
     }
 
     public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
@@ -82,6 +85,11 @@ public class Territory implements VoidTerritory {
     public boolean hasNeighbor(String s){
 
         return neighbors.contains(s);
+    }
+
+    public Point getCapitalLocation(){
+
+        return capital;
     }
 
 }

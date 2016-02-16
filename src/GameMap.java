@@ -15,7 +15,7 @@ public class GameMap {
 
     private JFrame mainMapFrame;
     private JPanel mainMapPanel;
-    private MouseAdapter ma;
+    public boolean loadingFinished = false;
 
     private JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
     private JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
@@ -26,8 +26,11 @@ public class GameMap {
         initMainMapFrame();
         initMainMapPanel();
 
-        claimPhase(path);
-        normalRound();
+        createMap(readMapFile(path));
+
+        initCapital();
+//        claimPhase(path);
+//        normalRound();
 
     }
 
@@ -35,7 +38,7 @@ public class GameMap {
 
 //        just for debugging
         for (String line : mapData){
-            //System.out.println(line);
+//            System.out.println(line);
         }
 //        ------------------
 
@@ -56,6 +59,7 @@ public class GameMap {
             }
         }
 
+        loadingFinished = true;
         mainMapFrame.repaint();
     }
 
@@ -147,23 +151,16 @@ public class GameMap {
 
         line = line.substring(line.indexOf(':') + 2);               //Name und Doppelpunkt wegstreichen
 
-        if (line.indexOf('-')>0) {
+        while (line.indexOf('-') > 0) {
 
-            do {
-                territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
-                territories.get(line.substring(0, line.indexOf('-') - 1)).setNeighbor(territory);
-                line = line.substring(line.indexOf('-') + 2);
+            territories.get(territory).setNeighbor(line.substring(0, line.indexOf('-') - 1));
+            territories.get(line.substring(0, line.indexOf('-') - 1)).setNeighbor(territory);
+            line = line.substring(line.indexOf('-') + 2);
 
-            } while (line.indexOf('-') > 0);
-            territories.get(territory).setNeighbor(line);
-            territories.get(line).setNeighbor(territory);
-        }
-        else{
-
-            territories.get(territory).setNeighbor(line);
-            territories.get(line).setNeighbor(territory);
         }
 
+        territories.get(territory).setNeighbor(line);
+        territories.get(line).setNeighbor(territory);
     }
 
     private void createContinent(String line){
@@ -223,27 +220,50 @@ public class GameMap {
 
     public void initCapital() {
 
-        //Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
+//        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
             String from = entry.getKey();
-            int x = entry.getValue().capital.getLocation().x;
-            int y = entry.getValue().capital.getLocation().y;
 
-            JLabel label = new JLabel(Integer.toString(entry.getValue().getArmies()));
-            mainMapPanel.add(label);
+            int x = entry.getValue().getCapitalLocation().x;
+            int y = entry.getValue().getCapitalLocation().y;
 
-            label.setHorizontalAlignment(SwingConstants.CENTER);
-            label.setVerticalAlignment(SwingConstants.CENTER);
 
-            label.setFont(new Font("Arial", Font.BOLD, 14));
-            label.setSize(20, 20);
-            label.setLocation(x-label.getWidth()/2, y-label.getHeight()/2);
-            label.setForeground(Color.BLACK);
-            //label.setBorder(border);                  //shows the position of the Label
+
+            entry.getValue().labelCapital = new JLabel(Integer.toString(entry.getValue().getArmies()));
+
+
+            entry.getValue().labelCapital.setHorizontalAlignment(SwingConstants.CENTER);
+            entry.getValue().labelCapital.setVerticalAlignment(SwingConstants.CENTER);
+
+            entry.getValue().labelCapital.setFont(new Font("Arial", Font.BOLD, 14));
+            entry.getValue().labelCapital.setSize(20, 20);
+            entry.getValue().labelCapital.setLocation(x - entry.getValue().labelCapital.getWidth() / 2,
+                    y - entry.getValue().labelCapital.getHeight() / 2);
+            entry.getValue().labelCapital.setForeground(Color.BLACK);
+
+            mainMapPanel.add(entry.getValue().labelCapital);
+
+
+
+//            entry.getValue().capital = new JLabel(Integer.toString(entry.getValue().getArmies()));
+//
+//
+//            entry.getValue().capital.setHorizontalAlignment(SwingConstants.CENTER);
+//            entry.getValue().capital.setVerticalAlignment(SwingConstants.CENTER);
+//
+//            entry.getValue().capital.setFont(new Font("Arial", Font.BOLD, 14));
+//            entry.getValue().capital.setSize(20, 20);
+//            entry.getValue().capital.setLocation(x - entry.getValue().capital.getWidth() / 2,
+//                    y - entry.getValue().capital.getHeight() / 2);
+//            entry.getValue().capital.setForeground(Color.BLACK);
+
+//            entry.getValue().labelCapital.setBorder(border);                  //shows the position of the Label
 
         }
+
+        mainMapFrame.repaint();
     }
 
     public void initButton(){
@@ -305,63 +325,72 @@ public class GameMap {
             protected void paintComponent(Graphics g) {
 
                 //super.paintComponent(g);      //maybe needed if some Component is ONLY added to JFrame
+                if (loadingFinished) {
+
+                    Graphics2D g2d = (Graphics2D) g;
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    g2d.setColor(Color.WHITE);
+
+                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
+
+                        String from = entry.getKey();                                       //Von...
+                        int fromX = entry.getValue().getCapitalLocation().x;
+                        int fromY = entry.getValue().getCapitalLocation().y;
+
+                        for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
+
+                            String to = entry.getValue().getNeighbors().get(i);                              //Nach...
+                            int toX = territories.get(to).getCapitalLocation().x;
+                            int toY = territories.get(to).getCapitalLocation().y;
 
 
-                g.setColor(Color.WHITE);
-
-
-                for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
-
-                    String from = entry.getKey();                                       //Von...
-                    int fromX = entry.getValue().capital.getLocation().x;
-                    int fromY = entry.getValue().capital.getLocation().y;
-
-                    for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
-
-                        String to = entry.getValue().getNeighbors().get(i);                              //Nach...
-                        int toX = territories.get(to).capital.getLocation().x;
-                        int toY = territories.get(to).capital.getLocation().y;
-
-                        if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-                            g.drawLine(fromX, fromY, 0, fromY);
-                            g.drawLine(toX, toY, 1250, toY);
+                            if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                                g2d.drawLine(fromX, fromY, 0, fromY);
+                                g2d.drawLine(toX, toY, 1250, toY);
+                            }
+                            else {
+                                if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                                    g2d.drawLine(fromX,fromY,1250,fromY);
+                                    g2d.drawLine(toX,toY,0,toY);
+                                }
+                                else{
+                                    g2d.drawLine(fromX, fromY, toX, toY);
+                                }
+                            }
                         }
-                        else {
-                            if (from.equals("Kamchatka") && to.equals("Alaska")) {
-                                g.drawLine(fromX,fromY,1250,fromY);
-                                g.drawLine(toX,toY,0,toY);
+
+                    }
+
+
+                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+
+                        for (Polygon p : entry.getValue().getPatches()) {
+
+                            if (entry.getValue().getOccupied() == -1) {
+                                g2d.setColor(Color.LIGHT_GRAY);
+                                g2d.fillPolygon(p);
                             }
-                            else{
-                                g.drawLine(fromX, fromY, toX, toY);
+
+                            if (entry.getValue().getOccupied() == 0){
+                                g2d.setColor(new Color(194,0,0));
+                                g2d.fillPolygon(p);
                             }
+                            if (entry.getValue().getOccupied() == 1){
+                                g2d.setColor(new Color(10,180,30));
+                                g2d.fillPolygon(p);
+                            }
+                            g2d.setColor(Color.BLACK);
+                            g2d.drawPolygon(p);
                         }
                     }
 
+                    mainMapPanel.repaint();
+
+                } else {
+
+                    System.out.println("Still loading map, please wait...");
                 }
-
-
-                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-
-                    for (Polygon p : entry.getValue().getPatches()) {
-
-                        g.setColor(Color.LIGHT_GRAY);
-                        g.fillPolygon(p);
-
-
-                        if (entry.getValue().occupied == 0){
-                            g.setColor(new Color(194,0,0));
-                            g.fillPolygon(p);
-                        }
-                        if (entry.getValue().occupied == 1){
-                            g.setColor(new Color(10,180,30));
-                            g.fillPolygon(p);
-                        }
-                        g.setColor(Color.BLACK);
-                        g.drawPolygon(p);
-                    }
-                }
-
-
             }
 
             @Override
@@ -372,39 +401,52 @@ public class GameMap {
         };
         mainMapPanel.setLayout(null);
 
-        initMouseAdapter();
-
-        mainMapPanel.addMouseListener(ma);
-
-        mainMapFrame.add(mainMapPanel);
-        mainMapFrame.pack();
-    }
-
-    private void initMouseAdapter(){
-
-        ma = new MouseAdapter() {
+        MouseAdapter ma = new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent me) {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+                if(GameLogic.phase == 0){       //occupy Territories
 
-                    for (Polygon p : entry.getValue().getPatches()) {
+                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
-                        if (p.contains(me.getPoint())) {
+                        for (Polygon p : entry.getValue().getPatches()) {
 
-                            //System.out.println("Clicked polygon");  //debugging only
-                            entry.getValue().setOccupied(1);
+                            if (p.contains(me.getPoint()) && entry.getValue().getOccupied() == -1) {
 
+                                //System.out.println("Clicked polygon");  //debugging only
+                                entry.getValue().setOccupied(GameLogic.move % GameLogic.playerCount);
+                                entry.getValue().addReinforcement();
+                                entry.getValue().labelCapital.setText("" + entry.getValue().getArmies());
+
+                                GameLogic.occupiedTerritories++;
+                                GameLogic.move++;
+                                GameLogic.currentPlayer = GameLogic.move % GameLogic.playerCount;
+
+                                if(territories.size() == GameLogic.occupiedTerritories){
+
+                                    GameLogic.phase = 1;
+                                }
+                            }
                         }
                     }
+
                 }
 
-                mainMapFrame.repaint();
+                if(GameLogic.phase == 1){
+
+                    initTextField("Verstärkungsphase","Verteile deine Armeen");
+                    initButton();
+                }
             }
         };
+
+        mainMapPanel.addMouseListener(ma);
+
+        mainMapFrame.add(mainMapPanel);
+        mainMapFrame.pack();
     }
 
     @Override
@@ -415,8 +457,8 @@ public class GameMap {
         for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
             result += "Territory <" +  entry.getKey() + ">\n     ";
-            result += "capital:   [" + entry.getValue().capital.getLocation().x + ", " +
-                                    entry.getValue().capital.getLocation().y + "]\n     ";
+            result += "capital:   [" + entry.getValue().getCapitalLocation().x + ", " +
+                                    entry.getValue().getCapitalLocation().y + "]\n     ";
             result += "neighbors: " + entry.getValue().getNeighbors() +  "\n     ";
             result += "patches:   ";
 
@@ -450,7 +492,7 @@ public class GameMap {
 
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-            if (entry.getValue().occupied >= 0){
+            if (entry.getValue().getOccupied() >= 0){
                 count++;
             }
             if (count == 42){
@@ -465,4 +507,3 @@ public class GameMap {
         initButton();
     }
 }
-
