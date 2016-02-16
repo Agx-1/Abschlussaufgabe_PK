@@ -40,7 +40,7 @@ public class GameMap {
 
 //        just for debugging
         for (String line : mapData){
-            System.out.println(line);
+//            System.out.println(line);
         }
 //        ------------------
 
@@ -176,18 +176,18 @@ public class GameMap {
         int reinforcementBonus = Integer.parseInt(line.substring(name.length()+1,name.length()+2));
 //        System.out.println(reinforcementBonus);
         line = line.substring(name.length()+5);
-//        System.out.println(line);
+        System.out.println(line);
 
-        LinkedList<Territory> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
+        LinkedList<String> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
 
         while (line.indexOf('-') > 0) {
-            members.add(territories.get(line.substring(0, line.indexOf('-') - 1)));
+            members.add(line.substring(0, line.indexOf('-') - 1));
             line = line.substring(line.indexOf('-') + 2);
         }
-        members.add(territories.get(line));
+        members.add(line);
 //        System.out.println(members);
 
-        continents.put(name,new Continent(reinforcementBonus,members));
+        continents.put(name, new Continent(reinforcementBonus, members));
 //        System.out.println(continents.keySet());
     }
 
@@ -297,7 +297,7 @@ public class GameMap {
         labelInstr.setText(instruction);
         labelInstr.setFont(new Font("Arial", Font.PLAIN, 17));
         labelInstr.setSize(700,30);
-        labelInstr.setLocation(300,600);
+        labelInstr.setLocation(300, 600);
         labelInstr.setForeground(Color.BLACK);
     }
 
@@ -306,6 +306,8 @@ public class GameMap {
         labelPhase.setText(phase);
         labelInstr.setText(instruction);
 
+        labelPhase.repaint();
+        labelInstr.repaint();
         mainMapPanel.repaint();
     }
 
@@ -424,7 +426,7 @@ public class GameMap {
 
                 if(GameLogic.phase == 1){
 
-                    normalRound();
+                    normalRound(me);
                 }
             }
         };
@@ -439,11 +441,11 @@ public class GameMap {
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()){
 
-            result += "Territory <" +  entry.getKey() + ">\n     ";
-            result += "capital:   [" + entry.getValue().getCapitalLocation().x + ", " +
-                                    entry.getValue().getCapitalLocation().y + "]\n     ";
-            result += "neighbors: " + entry.getValue().getNeighbors() +  "\n     ";
-            result += "patches:   ";
+            result += "Territory <" +  entry.getKey() + ">\n";
+            result += "     capital:   [" + entry.getValue().getCapitalLocation().x + ", " +
+                                    entry.getValue().getCapitalLocation().y + "]\n";
+            result += "     neighbors: " + entry.getValue().getNeighbors() +  "\n";
+            result += "     patches:   ";
 
             for (Polygon p : entry.getValue().getPatches()){
 
@@ -454,6 +456,21 @@ public class GameMap {
                     result +=       p.ypoints[i] + "], ";
                 }
                 result += " }" + "\n                ";
+            }
+
+            result += "\n";
+        }
+
+        for (Map.Entry<String, Continent> entry : continents.entrySet()){
+
+            result += "Continent <" + entry.getKey() + ">\n";
+            result += "     bonus:   " + entry.getValue().reinforcementBonus + "\n";
+
+            result += "     members: ";
+            for (String member : entry.getValue().members){
+
+                result += member;
+                result += "\n              ";
             }
 
             result += "\n";
@@ -477,9 +494,31 @@ public class GameMap {
         return true;
     }
 
-    private void normalRound(){
+    private void normalRound(MouseEvent me){
 
-        calculateReinforcements();
+        if(GameLogic.beginOfRound){
+
+            calculateReinforcements();
+        }
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+            for(Polygon p : entry.getValue().getPatches()){
+
+                if(p.contains(me.getPoint())){
+
+                    if(entry.getValue().getOccupied() == GameLogic.currentPlayer){
+
+                        if(reinforcements > 0){
+
+                            entry.getValue().addReinforcement();
+                            reinforcements--;
+                            System.out.println("remaining reinforcements: " + reinforcements);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void claimPhase(MouseEvent me){
@@ -526,9 +565,9 @@ public class GameMap {
 
             boolean continentBonus = true;
 
-            for (VoidTerritory territory : entry.getValue().territories){
+            for (String territory : entry.getValue().members){
 
-                if(!(territory.getOccupied() == GameLogic.currentPlayer)){
+                if(!(territories.get(territory).getOccupied() == GameLogic.currentPlayer)){
 
                     continentBonus = false;
                 }
@@ -536,9 +575,33 @@ public class GameMap {
 
             if(continentBonus){
 
+                System.out.println("current player: " + GameLogic.currentPlayer);
                 reinforcements += entry.getValue().reinforcementBonus;
-                System.out.println("Reinforcements: " + reinforcements);
+                System.out.println("Reinforcements for continents: " + reinforcements);
             }
         }
+
+        int occupiedTerritories = 0;
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+            if(GameLogic.currentPlayer == entry.getValue().getOccupied()){
+
+                occupiedTerritories++;
+            }
+        }
+
+        System.out.println("reinforcements for territories: " + occupiedTerritories/3);
+        reinforcements += occupiedTerritories/3;
+        reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
+        System.out.println("reinforcements total: " + reinforcements);
+
+        GameLogic.beginOfRound = false;
+    }
+
+    private void newRound() {
+
+        GameLogic.round++;
+
     }
 }

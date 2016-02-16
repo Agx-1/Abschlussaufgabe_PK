@@ -11,6 +11,7 @@ public class GameLogic {        //class is probably obsolete, remove if finished
     public static int currentPlayer = 1;       //0 for computer, upcoming integers for human players
     public static int occupiedTerritories = 0;
     public static int round = 1;
+    public static boolean beginOfRound = true;
 
     //attacker has to have >1 armies in his VoidTerritory
     public static void attack(VoidTerritory attacker, VoidTerritory defender)

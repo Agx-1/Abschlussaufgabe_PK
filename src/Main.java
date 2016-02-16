@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        GameMap gameMap = new GameMap("maps/squares.map");
+        GameMap gameMap = new GameMap("maps/three-continents.map");
 
 
         TestingTerritory terr1 = new TestingTerritory(4);

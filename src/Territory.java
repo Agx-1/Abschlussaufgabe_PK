@@ -43,6 +43,7 @@ public class Territory implements VoidTerritory {
     public void addReinforcement(){
 
         armies++;
+        System.out.println("armies in territory: " + armies);
         labelCapital.setText(Integer.toString(armies));
     }
 
