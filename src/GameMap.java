@@ -38,7 +38,7 @@ public class GameMap {
 
 //        just for debugging
         for (String line : mapData){
-//            System.out.println(line);
+            System.out.println(line);
         }
 //        ------------------
 
@@ -56,6 +56,9 @@ public class GameMap {
             if (line.startsWith("neighbors-of")){
 
                 createNeighbors(line);
+            }
+            if (line.startsWith("continent")){
+                createContinent(line);
             }
         }
 
@@ -164,8 +167,26 @@ public class GameMap {
     }
 
     private void createContinent(String line){
+        line = line.replace("continent ", "");
 
+        String name = line.substring(0,line.indexOf(':')-3);
+//        System.out.println(name);
+        int reinforcementBonus = Integer.parseInt(line.substring(name.length()+1,name.length()+2));
+//        System.out.println(reinforcementBonus);
+        line = line.substring(name.length()+5);
+//        System.out.println(line);
 
+        LinkedList<Territory> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
+
+        while (line.indexOf('-') > 0) {
+            members.add(territories.get(line.substring(0, line.indexOf('-') - 1)));
+            line = line.substring(line.indexOf('-') + 2);
+        }
+        members.add(territories.get(line));
+//        System.out.println(members);
+
+        continents.put(name,new Continent(reinforcementBonus,members));
+//        System.out.println(continents.keySet());
     }
 
     public Map<String, Continent> getContinents(){
