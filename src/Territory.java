@@ -9,7 +9,8 @@ import java.util.LinkedList;
 public class Territory implements VoidTerritory {
 
     private final String name;
-    public JLabel capital = new JLabel("");
+    private Point capital;
+    public JLabel labelCapital = new JLabel();
     private int armies;
     private int occupied = -1;
     private LinkedList<Polygon> patches = new LinkedList<>();
@@ -25,7 +26,7 @@ public class Territory implements VoidTerritory {
     public Territory(String name, int[] capitalCoordinates){
 
         this.name = name;
-        this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
+        this.capital = new Point(capitalCoordinates[0], capitalCoordinates[1]);
     }
 
     public int getArmies(){
@@ -36,13 +37,13 @@ public class Territory implements VoidTerritory {
     public void removeArmy(){
 
         armies--;
-        capital.setText(Integer.toString(armies));
+        labelCapital.setText(Integer.toString(armies));
     }
 
     public void addReinforcement(){
 
         armies++;
-        capital.setText(Integer.toString(armies));
+        labelCapital.setText(Integer.toString(armies));
     }
 
     public void addPatch(Polygon patch){
@@ -57,8 +58,8 @@ public class Territory implements VoidTerritory {
 
     public void addCapital(int[] capitalCoordinates){
 
-        this.capital.setLocation(capitalCoordinates[0], capitalCoordinates[1]);
-        capital.setText("0");
+        capital = new Point(capitalCoordinates[0], capitalCoordinates[1]);
+        labelCapital.setText("0");
     }
 
     public void setOccupied(int occupied){
@@ -84,6 +85,11 @@ public class Territory implements VoidTerritory {
     public boolean hasNeighbor(String s){
 
         return neighbors.contains(s);
+    }
+
+    public Point getCapitalLocation(){
+
+        return capital;
     }
 
 }

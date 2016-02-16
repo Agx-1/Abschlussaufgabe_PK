@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        GameMap gameMap = new GameMap("maps/squares.map");
+        GameMap gameMap = new GameMap("maps/world.map");
 
         GameLogic.startOccupyingPhase();
 
@@ -15,8 +15,6 @@ public class Main {
         TestingTerritory terr1 = new TestingTerritory(4);
         TestingTerritory terr2 = new TestingTerritory(2);
 
-        System.out.println(gameMap.toString());
-
-
+        //System.out.println(gameMap.toString());
     }
 }

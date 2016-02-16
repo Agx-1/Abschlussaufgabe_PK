@@ -6,10 +6,11 @@ import java.util.Arrays;
 public class GameLogic {        //class is probably obsolete, remove if finished
 
     public static int phase = 0;
-    public static int round = 1;
+    public static int move = 1;
     public static final int playerCount = 2;
     public static int currentPlayer = 1;       //0 for computer, upcoming integers for human players
     public static int occupiedTerritories = 0;
+    public static int round = 1;
 
     //attacker has to have >1 armies in his VoidTerritory
     public static void attack(VoidTerritory attacker, VoidTerritory defender)
