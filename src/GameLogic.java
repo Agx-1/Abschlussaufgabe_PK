@@ -100,6 +100,7 @@ public class GameLogic {        //class is probably obsolete, remove if finished
 
             if(defender.getArmies() == 0){
 
+                defender.occupy(currentPlayer, attackerDices.length);
                 System.out.println("Attacker occupied territory with " + attackerDices.length + " armies.");
             }
         }

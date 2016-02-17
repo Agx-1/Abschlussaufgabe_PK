@@ -16,4 +16,6 @@ public interface VoidTerritory {
 
     int getOccupied();
 
+    void occupy(int player, int armies);
+
 }

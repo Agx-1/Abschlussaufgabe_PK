@@ -243,22 +243,6 @@ public class GameMap {
 
             mainMapPanel.add(entry.getValue().labelCapital);
 
-
-
-//            entry.getValue().capital = new JLabel(Integer.toString(entry.getValue().getArmies()));
-//
-//
-//            entry.getValue().capital.setHorizontalAlignment(SwingConstants.CENTER);
-//            entry.getValue().capital.setVerticalAlignment(SwingConstants.CENTER);
-//
-//            entry.getValue().capital.setFont(new Font("Arial", Font.BOLD, 14));
-//            entry.getValue().capital.setSize(20, 20);
-//            entry.getValue().capital.setLocation(x - entry.getValue().capital.getWidth() / 2,
-//                    y - entry.getValue().capital.getHeight() / 2);
-//            entry.getValue().capital.setForeground(Color.BLACK);
-
-//            entry.getValue().labelCapital.setBorder(border);                  //shows the position of the Label
-
         }
 
         mainMapFrame.repaint();
@@ -374,6 +358,7 @@ public class GameMap {
                         for (Polygon p : entry.getValue().getPatches()) {
 
                             if (entry.getValue().getOccupied() == -1) {
+
                                 g2d.setColor(Color.LIGHT_GRAY);
                                 g2d.fillPolygon(p);
                             }
@@ -387,6 +372,15 @@ public class GameMap {
                                 g2d.fillPolygon(p);
                             }
                             g2d.setColor(Color.BLACK);
+                            g2d.drawPolygon(p);
+                        }
+                    }
+
+                    if(origin != null){
+
+                        for (Polygon p : origin.getPatches()){
+
+                            g2d.setColor(Color.YELLOW);
                             g2d.drawPolygon(p);
                         }
                     }
@@ -502,21 +496,6 @@ public class GameMap {
         return  result;
     }
 
-//    private boolean checkClaimPhase(){
-//        int count = 0;
-//
-//
-//        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-//            if (entry.getValue().getOccupied() >= 0){
-//                count++;
-//            }
-//            if (count == 42){
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
-
     private void attackMovePhase(String selectedTerritoryName, Territory selectedTerritory){
 
         if(selectedTerritory.getOccupied() == GameLogic.currentPlayer){
@@ -581,14 +560,6 @@ public class GameMap {
             }
         }
     }
-
-//    private void claimPhase(String path){
-//        createMap(readMapFile(path));
-//        initCapital();
-//        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
-//        while(checkClaimPhase()){}
-//
-//    }
 
     public void calculateReinforcements(){
 

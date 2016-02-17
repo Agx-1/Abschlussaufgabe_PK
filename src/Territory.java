@@ -73,6 +73,15 @@ public class Territory implements VoidTerritory {
         return occupied;
     }
 
+    public void occupy(int player, int armies){
+
+        occupied = player;
+        this.armies = armies;
+
+        labelCapital.setText("" + armies);
+
+    }
+
     public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
 
         neighbors.add(s);

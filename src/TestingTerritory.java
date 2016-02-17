@@ -31,4 +31,9 @@ public class TestingTerritory implements VoidTerritory {
 
         return 0;
     }
+
+    public void occupy(int player, int armies){
+
+
+    }
 }
