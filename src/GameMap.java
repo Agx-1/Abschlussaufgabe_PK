@@ -24,6 +24,7 @@ public class GameMap {
     private JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
     private JLabel labelReinforcements = new JLabel("",SwingConstants.CENTER);
     private JLabel labelCounter = new JLabel("",SwingConstants.LEFT);
+    private JLabel labelPlayer = new JLabel("",SwingConstants.LEFT);
 
 
     public GameMap(String path) {
@@ -39,6 +40,7 @@ public class GameMap {
 //        normalRound();
         initCounterField(0);
         initReinforcementsField();
+        initPlayerField();
     }
 
     public void createMap(LinkedList<String> mapData) {
@@ -337,6 +339,16 @@ public class GameMap {
         labelReinforcements.setForeground(new Color(50,50,50));
     }
 
+    public void initPlayerField(){
+        mainMapPanel.add(labelPlayer);
+
+        labelPlayer.setText("Player: " + Integer.toString(GameLogic.currentPlayer));
+        labelPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
+        labelPlayer.setSize(100, 20);
+        labelPlayer.setLocation(10, 610);
+        labelPlayer.setForeground(new Color(97, 91, 97));
+    }
+
     private void initMainMapFrame(){
 
         mainMapFrame = new JFrame();
@@ -362,63 +374,8 @@ public class GameMap {
                     Graphics2D g2d = (Graphics2D) g;
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                    g2d.setColor(Color.WHITE);
-
-                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
-
-                        String from = entry.getKey();                                       //Von...
-                        int fromX = entry.getValue().getCapitalLocation().x;
-                        int fromY = entry.getValue().getCapitalLocation().y;
-
-                        for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
-
-                            String to = entry.getValue().getNeighbors().get(i);                              //Nach...
-                            int toX = territories.get(to).getCapitalLocation().x;
-                            int toY = territories.get(to).getCapitalLocation().y;
-
-
-                            if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-                                g2d.drawLine(fromX, fromY, 0, fromY);
-                                g2d.drawLine(toX, toY, 1250, toY);
-                            }
-                            else {
-                                if (from.equals("Kamchatka") && to.equals("Alaska")) {
-                                    g2d.drawLine(fromX,fromY,1250,fromY);
-                                    g2d.drawLine(toX,toY,0,toY);
-                                }
-                                else{
-                                    g2d.drawLine(fromX, fromY, toX, toY);
-                                }
-                            }
-                        }
-
-                    }
-
-
-                    for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-
-                        for (Polygon p : entry.getValue().getPatches()) {
-
-                            if (entry.getValue().getOccupied() == -1) {
-                                g2d.setColor(Color.LIGHT_GRAY);
-                                g2d.fillPolygon(p);
-                            }
-
-                            if (entry.getValue().getOccupied() == 0){
-                                g2d.setColor(new Color(194,0,0));
-                                g2d.fillPolygon(p);
-                            }
-                            if (entry.getValue().getOccupied() == 1){
-                                g2d.setColor(new Color(10,180,30));
-                                g2d.fillPolygon(p);
-                            }
-                            g2d.setColor(Color.BLACK);
-                            g2d.drawPolygon(p);
-                        }
-                    }
-
-                    mainMapPanel.repaint();
-
+                    drawMap(g2d);
+                    //else highlightNeighborsOf(selectedTerritory);
                 }
             }
 
@@ -445,8 +402,8 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                Territory selectedTerritory = null;
                 String selectedTerritoryName = "";
+                Territory selectedTerritory = null;
 
                 findClickedTerritory:
                 for (Map.Entry<String, Territory> entry : territories.entrySet()){
@@ -462,8 +419,9 @@ public class GameMap {
                     }
                 }
 
-                if(selectedTerritory != null){
+                if(SwingUtilities.isLeftMouseButton(me) && selectedTerritory != null){
 
+                    System.out.println("LEFT KLICK");
                     switch (GameLogic.phase){
 
                         case -1:
@@ -477,10 +435,102 @@ public class GameMap {
                             break;
                     }
                 }
+
+                if(SwingUtilities.isRightMouseButton(me) && selectedTerritory != null){
+
+                    System.out.println("RIGHT KLICK");
+                    switch (GameLogic.phase){
+
+                        case 1:
+                            //TODO: attackieren
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         };
 
         mainMapPanel.addMouseListener(ma);
+    }
+
+    private void drawMap(Graphics2D g2d){
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
+            g2d.setColor(Color.WHITE);
+            String from = entry.getKey();                                       //Von...
+            int fromX = entry.getValue().getCapitalLocation().x;
+            int fromY = entry.getValue().getCapitalLocation().y;
+
+            for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
+
+                String to = entry.getValue().getNeighbors().get(i);                              //Nach...
+                int toX = territories.get(to).getCapitalLocation().x;
+                int toY = territories.get(to).getCapitalLocation().y;
+
+
+                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                    g2d.drawLine(fromX, fromY, 0, fromY);
+                    g2d.drawLine(toX, toY, 1250, toY);
+                }
+                else {
+                    if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                        g2d.drawLine(fromX,fromY,1250,fromY);
+                        g2d.drawLine(toX,toY,0,toY);
+                    }
+                    else{
+                        g2d.drawLine(fromX, fromY, toX, toY);
+                    }
+                }
+            }
+
+        }
+
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+
+            for (Polygon p : entry.getValue().getPatches()) {
+
+                if (entry.getValue().getOccupied() == -1) {
+                    g2d.setColor(Color.LIGHT_GRAY);
+                    g2d.fillPolygon(p);
+                }
+
+                if (entry.getValue().getOccupied() == 0){
+                    g2d.setColor(new Color(194,0,0));
+                    g2d.fillPolygon(p);
+                }
+                if (entry.getValue().getOccupied() == 1){
+                    g2d.setColor(new Color(10,180,30));
+                    g2d.fillPolygon(p);
+                }
+                g2d.setColor(Color.BLACK);
+                g2d.drawPolygon(p);
+            }
+        }
+
+
+        if (origin != null){
+            for(Polygon p : origin.getPatches()){
+                g2d.setColor(new Color(92, 221, 73));
+                g2d.fillPolygon(p);
+                g2d.setColor(Color.WHITE);
+                g2d.drawPolygon(p);
+            }
+            for (int i = 0; i < origin.getNeighbors().size(); i++) {
+                for( Polygon p : territories.get(origin.getNeighbors().get(i)).getPatches()){
+                    if (territories.get(origin.getNeighbors().get(i)).getOccupied() == GameLogic.currentPlayer)
+                        g2d.setColor(new Color(92, 221, 73));
+                    else
+                        g2d.setColor(new Color(245, 44, 24));
+                    g2d.fillPolygon(p);
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawPolygon(p);
+                }
+
+            }
+        }
+
+        mainMapPanel.repaint();
     }
 
     @Override
@@ -675,5 +725,7 @@ public class GameMap {
 
             calculateReinforcements();
         }
+        labelPlayer.setText("Player: " + Integer.toString(GameLogic.currentPlayer));
+        mainMapFrame.repaint();
     }
 }
