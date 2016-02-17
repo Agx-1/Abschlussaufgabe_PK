@@ -1,9 +1,12 @@
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.LineBreakMeasurer;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -38,7 +41,7 @@ public class GameMap {
         initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
 //        claimPhase(path);
 //        normalRound();
-        initCounterField(0);
+        initCounterField();
         initReinforcementsField();
         initPlayerField();
     }
@@ -284,10 +287,11 @@ public class GameMap {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //JOptionPane.showMessageDialog(null,"You have ended the round.");
-                if( GameLogic.round % 2 == 0){
-                    initCounterField(GameLogic.round);
+                if( GameLogic.round % 2 == 0){      //TODO: is it modolo 2 or 4 ?
+                    initCounterField();
                 }
                 GameLogic.nextPhase();
+                initEndField(true);
             }
         });
 
@@ -319,10 +323,10 @@ public class GameMap {
         mainMapFrame.repaint();
     }
 
-    public void initCounterField(int round){
+    public void initCounterField(){
         mainMapPanel.add(labelCounter);
 
-        labelCounter.setText("Runde: " + Integer.toString(round));
+        labelCounter.setText("Runde: " + (GameLogic.round -1 ) );       //it will now start with round 0
         labelCounter.setFont(new Font("Arial", Font.PLAIN, 10));
         labelCounter.setSize(100,20);
         labelCounter.setLocation(10, 625);
@@ -347,6 +351,43 @@ public class GameMap {
         labelPlayer.setSize(100, 20);
         labelPlayer.setLocation(10, 610);
         labelPlayer.setForeground(new Color(97, 91, 97));
+    }
+
+    public void initEndField(boolean b){                //wird vorerst aufgerufen beim ersten drücken des Buttons "end this round"
+        JLabel labelEnd = new JLabel("",SwingConstants.CENTER);
+        JLabel labelEndFrame = new JLabel("",SwingConstants.CENTER);
+        mainMapPanel.add(labelEnd);
+        mainMapPanel.add(labelEndFrame);
+        Border border = LineBorder.createBlackLineBorder();
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {     //delets all Capitals in the Range of the Frame
+            int x = entry.getValue().getCapitalLocation().x;
+            int y = entry.getValue().getCapitalLocation().y;
+            if ( (x > 400 && x < 850) && (y > 200 && y < 450 ) ) {
+                entry.getValue().labelCapital.setText("");
+            }
+
+        }
+
+        String ans;
+        if (b) ans = "Gewonnen!";
+        else ans = "Verloren :(";
+
+        labelEnd.setText(ans);
+        labelEnd.setFont(new Font("Arial", Font.BOLD, 40));
+        labelEnd.setSize(400,200);
+        labelEnd.setLocation(425,225);
+        labelEnd.setForeground(Color.BLACK);
+        labelEnd.setBackground(new Color(255, 133, 8));
+        labelEnd.setOpaque(true);
+        labelEnd.setBorder(border);
+
+        labelEndFrame.setSize(440,240);
+        labelEndFrame.setLocation(405,205);
+        labelEndFrame.setBackground(new Color(205, 86, 11));
+        labelEndFrame.setOpaque(true);
+        labelEndFrame.setBorder(border);
+
     }
 
     private void initMainMapFrame(){
@@ -510,23 +551,25 @@ public class GameMap {
 
 
         if (origin != null){
-            for(Polygon p : origin.getPatches()){
-                g2d.setColor(new Color(92, 221, 73));
-                g2d.fillPolygon(p);
-                g2d.setColor(Color.WHITE);
-                g2d.drawPolygon(p);
-            }
+
             for (int i = 0; i < origin.getNeighbors().size(); i++) {
                 for( Polygon p : territories.get(origin.getNeighbors().get(i)).getPatches()){
                     if (territories.get(origin.getNeighbors().get(i)).getOccupied() == GameLogic.currentPlayer)
                         g2d.setColor(new Color(92, 221, 73));
                     else
-                        g2d.setColor(new Color(245, 44, 24));
+                        g2d.setColor(new Color(255, 77, 47));
                     g2d.fillPolygon(p);
                     g2d.setColor(Color.BLACK);
                     g2d.drawPolygon(p);
                 }
 
+            }
+
+            for(Polygon p : origin.getPatches()){
+                g2d.setColor(new Color(92, 221, 73));
+                g2d.fillPolygon(p);
+                g2d.setColor(Color.WHITE);
+                g2d.drawPolygon(p);
             }
         }
 
