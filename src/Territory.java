@@ -43,7 +43,7 @@ public class Territory implements VoidTerritory {
     public void addReinforcement(){
 
         armies++;
-        System.out.println("armies in territory: " + armies);
+//        System.out.println("armies in territory: " + armies);
         labelCapital.setText(Integer.toString(armies));
     }
 
@@ -83,7 +83,7 @@ public class Territory implements VoidTerritory {
         return neighbors;
     }
 
-    public boolean hasNeighbor(String s){
+    public boolean isNeighborOf(String s){
 
         return neighbors.contains(s);
     }

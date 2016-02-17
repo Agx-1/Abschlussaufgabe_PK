@@ -5,13 +5,12 @@ import java.util.Arrays;
  */
 public class GameLogic {        //class is probably obsolete, remove if finished
 
-    public static int phase = 0;
-    public static int move = 1;
-    public static final int playerCount = 2;
+    // -1 stands for claim phase, 0 for reinforce, 1 for attacking and moving
+    public static int phase = -1;
+    public static final int playerCount = 2;    //number of players participating in the game
     public static int currentPlayer = 1;       //0 for computer, upcoming integers for human players
     public static int occupiedTerritories = 0;
     public static int round = 1;
-    public static boolean beginOfRound = true;
 
     //attacker has to have >1 armies in his VoidTerritory
     public static void attack(VoidTerritory attacker, VoidTerritory defender)
@@ -109,10 +108,6 @@ public class GameLogic {        //class is probably obsolete, remove if finished
         System.out.println("Armies attacker: " + attacker.getArmies());
     }
 
-    public static void distributeReinforcements(){
-
-    }
-
     private static int rollDice(){
 
         return ((int)(Math.random()*6))%6 + 1;      //tested and approved
@@ -129,6 +124,16 @@ public class GameLogic {        //class is probably obsolete, remove if finished
         }
 
         return result;
+    }
+
+    public static void nextPhase(){
+
+        phase++;
+
+        if(phase / 2 == 1)
+            round++;
+
+        phase %= 2;
     }
 
 }

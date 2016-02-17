@@ -14,6 +14,7 @@ public class GameMap {
     private Map<String, Continent> continents = new HashMap<>();
 
     private int reinforcements = 0;
+    private Territory origin;       //origin of attack or reinforcement-distribution
 
     private JFrame mainMapFrame;
     private JPanel mainMapPanel;
@@ -31,6 +32,7 @@ public class GameMap {
         createMap(readMapFile(path));
 
         initCapital();
+        initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
 //        claimPhase(path);
 //        normalRound();
 
@@ -306,9 +308,7 @@ public class GameMap {
         labelPhase.setText(phase);
         labelInstr.setText(instruction);
 
-        labelPhase.repaint();
-        labelInstr.repaint();
-        mainMapPanel.repaint();
+        mainMapFrame.repaint();
     }
 
     private void initMainMapFrame(){
@@ -419,14 +419,37 @@ public class GameMap {
 
                 //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
 
-                if(GameLogic.phase == 0){       //occupy Territories
+                Territory selectedTerritory = null;
+                String selectedTerritoryName = "";
 
-                    claimPhase(me);
+                findClickedTerritory:
+                for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+                    for(Polygon p : entry.getValue().getPatches()){
+
+                        if(p.contains(me.getPoint())){
+
+                            selectedTerritory = entry.getValue();
+                            selectedTerritoryName = entry.getKey();
+                            break findClickedTerritory;
+                        }
+                    }
                 }
 
-                if(GameLogic.phase == 1){
+                if(selectedTerritory != null){
 
-                    normalRound(me);
+                    switch (GameLogic.phase){
+
+                        case -1:
+                            claimPhase(selectedTerritory);
+                            break;
+                        case 0:
+                            distributeReinforcements(selectedTerritory);
+                            break;
+                        case 1:
+                            attackMovePhase(selectedTerritoryName, selectedTerritory);
+                            break;
+                    }
                 }
             }
         };
@@ -479,87 +502,97 @@ public class GameMap {
         return  result;
     }
 
-    private boolean checkClaimPhase(){
-        int count = 0;
+//    private boolean checkClaimPhase(){
+//        int count = 0;
+//
+//
+//        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+//            if (entry.getValue().getOccupied() >= 0){
+//                count++;
+//            }
+//            if (count == 42){
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
+    private void attackMovePhase(String selectedTerritoryName, Territory selectedTerritory){
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-            if (entry.getValue().getOccupied() >= 0){
-                count++;
-            }
-            if (count == 42){
-                return false;
+        if(selectedTerritory.getOccupied() == GameLogic.currentPlayer){
+
+            origin = selectedTerritory;
+
+        } else{
+
+            if(selectedTerritoryName != "" && selectedTerritory != null && origin != null)
+            if(origin.isNeighborOf(selectedTerritoryName)){
+
+                GameLogic.attack(origin, selectedTerritory);
             }
         }
-        return true;
     }
 
-    private void normalRound(MouseEvent me){
+    private void distributeReinforcements(Territory selectedTerritory){
 
-        if(GameLogic.beginOfRound){
+        if(selectedTerritory.getOccupied() == GameLogic.currentPlayer){
 
-            calculateReinforcements();
-        }
+            if(reinforcements > 0){
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+                selectedTerritory.addReinforcement();
+                reinforcements--;
+                System.out.println("remaining reinforcements: " + reinforcements);
 
-            for(Polygon p : entry.getValue().getPatches()){
+                if(reinforcements == 0){
 
-                if(p.contains(me.getPoint())){
+                    if(GameLogic.currentPlayer == GameLogic.playerCount - 1){
 
-                    if(entry.getValue().getOccupied() == GameLogic.currentPlayer){
+                        setTextField("Attacking", "Let's start rumbling");
+                        GameLogic.phase++;
 
-                        if(reinforcements > 0){
+                    } else{
 
-                            entry.getValue().addReinforcement();
-                            reinforcements--;
-                            System.out.println("remaining reinforcements: " + reinforcements);
-                        }
+                        nextPlayer();
                     }
                 }
             }
         }
     }
 
-    private void claimPhase(MouseEvent me){
+    private void claimPhase(Territory selectedTerritory){
 
-        initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
+        if (selectedTerritory.getOccupied() == -1) {
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+            //System.out.println("Clicked polygon");  //debugging only
+            selectedTerritory.setOccupied(GameLogic.currentPlayer);
+            selectedTerritory.addReinforcement();
+            selectedTerritory.labelCapital.setText("" + selectedTerritory.getArmies());
 
-            for (Polygon p : entry.getValue().getPatches()) {
+            GameLogic.occupiedTerritories++;
+            nextPlayer();
 
-                if (p.contains(me.getPoint()) && entry.getValue().getOccupied() == -1) {
+            if(territories.size() == GameLogic.occupiedTerritories){
 
-                    //System.out.println("Clicked polygon");  //debugging only
-                    entry.getValue().setOccupied(GameLogic.move % GameLogic.playerCount);
-                    entry.getValue().addReinforcement();
-                    entry.getValue().labelCapital.setText("" + entry.getValue().getArmies());
+                GameLogic.nextPhase();
+                setTextField("Verstärkungsphase","Verteile deine Armeen");
+                initButton();
 
-                    GameLogic.occupiedTerritories++;
-                    GameLogic.move++;
-                    GameLogic.currentPlayer = GameLogic.move % GameLogic.playerCount;
-
-                    if(territories.size() == GameLogic.occupiedTerritories){
-
-                        GameLogic.phase = 1;
-                        setTextField("Verstärkungsphase","Verteile deine Armeen");
-                        initButton();
-                    }
-                }
+                calculateReinforcements();
             }
         }
     }
 
-    private void claimPhase(String path){
-        createMap(readMapFile(path));
-        initCapital();
-        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
-        while(checkClaimPhase()){}
+//    private void claimPhase(String path){
+//        createMap(readMapFile(path));
+//        initCapital();
+//        initTextField("Eroberungsphase:","Such dir ein Territorium aus.");
+//        while(checkClaimPhase()){}
+//
+//    }
 
-    }
+    public void calculateReinforcements(){
 
-    private void calculateReinforcements(){
+        System.out.println("current player: " + GameLogic.currentPlayer);
 
         for(Map.Entry<String, Continent> entry : continents.entrySet()){
 
@@ -570,14 +603,17 @@ public class GameMap {
                 if(!(territories.get(territory).getOccupied() == GameLogic.currentPlayer)){
 
                     continentBonus = false;
+                    break;
                 }
             }
 
             if(continentBonus){
 
-                System.out.println("current player: " + GameLogic.currentPlayer);
                 reinforcements += entry.getValue().reinforcementBonus;
-                System.out.println("Reinforcements for continents: " + reinforcements);
+                System.out.println("Reinforcements for " + entry.getKey() + ": " + entry.getValue().reinforcementBonus);
+            } else{
+
+                System.out.println("Reinforcements for " + entry.getKey() + ": 0");
             }
         }
 
@@ -596,12 +632,22 @@ public class GameMap {
         reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
         System.out.println("reinforcements total: " + reinforcements);
 
-        GameLogic.beginOfRound = false;
     }
 
-    private void newRound() {
+    private void newRound(){
 
         GameLogic.round++;
+        calculateReinforcements();
+    }
 
+    private void nextPlayer(){
+
+        GameLogic.currentPlayer++;
+        GameLogic.currentPlayer %= GameLogic.playerCount;
+
+        if(GameLogic.phase == 0){
+
+            calculateReinforcements();
+        }
     }
 }
