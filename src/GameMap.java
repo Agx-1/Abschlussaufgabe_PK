@@ -22,6 +22,8 @@ public class GameMap {
 
     private JLabel labelPhase = new JLabel("",SwingConstants.CENTER);
     private JLabel labelInstr = new JLabel("",SwingConstants.CENTER);
+    private JLabel labelReinforcements = new JLabel("",SwingConstants.CENTER);
+    private JLabel labelCounter = new JLabel("",SwingConstants.LEFT);
 
 
     public GameMap(String path) {
@@ -35,7 +37,8 @@ public class GameMap {
         initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
 //        claimPhase(path);
 //        normalRound();
-
+        initCounterField(0);
+        initReinforcementsField();
     }
 
     public void createMap(LinkedList<String> mapData) {
@@ -173,7 +176,7 @@ public class GameMap {
     private void createContinent(String line){
         line = line.replace("continent ", "");
 
-        String name = line.substring(0,line.indexOf(':')-3);
+        String name = line.substring(0, line.indexOf(':') - 3);
 //        System.out.println(name);
         int reinforcementBonus = Integer.parseInt(line.substring(name.length()+1,name.length()+2));
 //        System.out.println(reinforcementBonus);
@@ -278,8 +281,11 @@ public class GameMap {
         b.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,"You have ended the round.");
-                //TODO
+                //JOptionPane.showMessageDialog(null,"You have ended the round.");
+                if( GameLogic.round % 2 == 0){
+                    initCounterField(GameLogic.round);
+                }
+                GameLogic.nextPhase();
             }
         });
 
@@ -309,6 +315,26 @@ public class GameMap {
         labelInstr.setText(instruction);
 
         mainMapFrame.repaint();
+    }
+
+    public void initCounterField(int round){
+        mainMapPanel.add(labelCounter);
+
+        labelCounter.setText("Runde: " + Integer.toString(round));
+        labelCounter.setFont(new Font("Arial", Font.PLAIN, 10));
+        labelCounter.setSize(100,20);
+        labelCounter.setLocation(10, 625);
+        labelCounter.setForeground(new Color(97, 91, 97));
+    }
+
+    public void initReinforcementsField(){
+        mainMapPanel.add(labelReinforcements);
+
+        labelReinforcements.setText("(Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen.)");
+        labelReinforcements.setFont(new Font("Arial", Font.PLAIN, 15));
+        labelReinforcements.setSize(700,30);
+        labelReinforcements.setLocation(300,618);
+        labelReinforcements.setForeground(new Color(50,50,50));
     }
 
     private void initMainMapFrame(){
