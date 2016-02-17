@@ -315,10 +315,16 @@ public class GameMap {
         mainMapPanel.add(labelReinforcements);
 
         labelReinforcements.setText("(Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen.)");
-        labelReinforcements.setFont(new Font("Arial", Font.PLAIN, 15));
-        labelReinforcements.setSize(700,30);
-        labelReinforcements.setLocation(300,618);
-        labelReinforcements.setForeground(new Color(50,50,50));
+        labelReinforcements.setFont(new Font("Courier New", Font.PLAIN, 15));
+        labelReinforcements.setSize(700, 30);
+        labelReinforcements.setLocation(300, 618);
+        labelReinforcements.setForeground(new Color(50, 50, 50));
+    }
+
+    private void updateReinforcementsField(){
+
+        labelReinforcements.setText("Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen");
+        mainMapFrame.repaint();
     }
 
     private void initMainMapFrame(){
@@ -550,10 +556,11 @@ public class GameMap {
 
                 if(reinforcements == 0){
 
-                    if(GameLogic.currentPlayer == GameLogic.playerCount - 1){
+                    if(GameLogic.currentPlayer == 0){
 
                         setTextField("Attacking", "Let's start rumbling");
                         GameLogic.phase++;
+                        GameLogic.currentPlayer = 1;
 
                     } else{
 
@@ -562,6 +569,8 @@ public class GameMap {
                 }
             }
         }
+
+        updateReinforcementsField();
     }
 
     private void claimPhase(Territory selectedTerritory){
@@ -579,6 +588,7 @@ public class GameMap {
             if(territories.size() == GameLogic.occupiedTerritories){
 
                 GameLogic.nextPhase();
+                GameLogic.currentPlayer = 1;
                 setTextField("Verstärkungsphase","Verteile deine Armeen");
                 initButton();
 
@@ -629,6 +639,7 @@ public class GameMap {
         reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
         System.out.println("reinforcements total: " + reinforcements);
 
+        updateReinforcementsField();
     }
 
     private void newRound(){

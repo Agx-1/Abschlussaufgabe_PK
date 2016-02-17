@@ -130,10 +130,6 @@ public class GameLogic {        //class is probably obsolete, remove if finished
     public static void nextPhase(){
 
         phase++;
-
-        if(phase / 2 == 1)
-            round++;
-
         phase %= 2;
     }
 
