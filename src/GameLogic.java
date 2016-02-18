@@ -101,6 +101,10 @@ public class GameLogic {        //class is probably obsolete, remove if finished
             if(defender.getArmies() == 0){
 
                 defender.occupy(currentPlayer, attackerDices.length);
+
+                for (int j = 0; j < attackerDices.length; j++) {
+                    attacker.removeArmy();
+                }
                 System.out.println("Attacker occupied territory with " + attackerDices.length + " armies.");
             }
         }
@@ -125,12 +129,6 @@ public class GameLogic {        //class is probably obsolete, remove if finished
         }
 
         return result;
-    }
-
-    public static void nextPhase(){
-
-        phase++;
-        phase %= 2;
     }
 
 }

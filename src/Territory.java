@@ -102,4 +102,14 @@ public class Territory implements VoidTerritory {
         return capital;
     }
 
+    public void moveArmyTo(Territory target){
+
+        if(this.armies > 1){
+
+            this.removeArmy();
+            target.addReinforcement();
+        }
+
+    }
+
 }
