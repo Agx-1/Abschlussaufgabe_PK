@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /**
  * Created by fabian on 15.01.16.
  */
-public class Territory implements VoidTerritory {
+public class Territory implements Occupyable {
 
     private final String name;
     private Point capital;
@@ -14,7 +14,7 @@ public class Territory implements VoidTerritory {
     private int armies;
     private int occupied = -1;
     private LinkedList<Polygon> patches = new LinkedList<>();
-    private ArrayList<String> neighbors = new ArrayList<>();
+    private LinkedList<Territory> neighbors = new LinkedList<>();
 
 
     public Territory(String name, Polygon patch){
@@ -82,19 +82,19 @@ public class Territory implements VoidTerritory {
 
     }
 
-    public void setNeighbor(String s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
+    public void setNeighbor(Territory s){          //set-Funktion die einzelnen Nachbarn hinzufügen lässt
 
         neighbors.add(s);
     }
 
-    public ArrayList<String> getNeighbors(){    //gibt alle Nachbarn zurück
+    public LinkedList<Territory> getNeighbors(){    //gibt alle Nachbarn zurück
 
         return neighbors;
     }
 
-    public boolean isNeighborOf(String s){
+    public boolean isNeighborOf(Territory territory){
 
-        return neighbors.contains(s);
+        return neighbors.contains(territory);
     }
 
     public Point getCapitalLocation(){
@@ -110,6 +110,11 @@ public class Territory implements VoidTerritory {
             target.addReinforcement();
         }
 
+    }
+
+    public String getName(){
+
+        return name;
     }
 
 }

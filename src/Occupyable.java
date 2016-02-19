@@ -3,7 +3,7 @@ import java.awt.*;
 /**
  * Created by fabian on 15.01.16.
  */
-public interface VoidTerritory {
+public interface Occupyable {
 
     //get the number of armies in current territory
     int getArmies();

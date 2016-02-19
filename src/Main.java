@@ -10,7 +10,7 @@ public class Main {
 
         GameMap gameMap = new GameMap("maps/three-continents.map");
 
-
+        System.out.println(gameMap.toString());
         TestingTerritory terr1 = new TestingTerritory(4);
         TestingTerritory terr2 = new TestingTerritory(2);
 

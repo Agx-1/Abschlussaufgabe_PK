@@ -11,9 +11,10 @@ public class GameLogic {        //class is probably obsolete, remove if finished
     public static int currentPlayer = 1;       //0 for computer, upcoming integers for human players
     public static int occupiedTerritories = 0;
     public static int round = 1;
+    private static Occupyable currentlyConquered = null;
 
     //attacker has to have >1 armies in his VoidTerritory
-    public static void attack(VoidTerritory attacker, VoidTerritory defender)
+    public static void attack(Occupyable attacker, Occupyable defender)
     {
         int[] attackerDices;
         int[] defenderDices;
@@ -101,10 +102,12 @@ public class GameLogic {        //class is probably obsolete, remove if finished
             if(defender.getArmies() == 0){
 
                 defender.occupy(currentPlayer, attackerDices.length);
+                setCurrentlyConquered(defender);
 
                 for (int j = 0; j < attackerDices.length; j++) {
                     attacker.removeArmy();
                 }
+
                 System.out.println("Attacker occupied territory with " + attackerDices.length + " armies.");
             }
         }
@@ -129,6 +132,16 @@ public class GameLogic {        //class is probably obsolete, remove if finished
         }
 
         return result;
+    }
+
+    public static void setCurrentlyConquered(Occupyable territory){
+
+        currentlyConquered = territory;
+    }
+
+    public static Occupyable getCurrentlyConquered(){
+
+        return currentlyConquered;
     }
 
 }

@@ -1,7 +1,7 @@
 /**
  * Created by fabian on 10.02.16.
  */
-public class TestingTerritory implements VoidTerritory {
+public class TestingTerritory implements Occupyable {
 
     private int armies = 0;
 
