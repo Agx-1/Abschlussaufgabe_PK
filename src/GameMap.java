@@ -1,9 +1,12 @@
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.LineBreakMeasurer;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -44,7 +47,6 @@ public class GameMap {
 
         initCapital();
         initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
-
         initPlayerField();
         initCounterField();
         initReinforcementsField();
@@ -364,6 +366,7 @@ public class GameMap {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //JOptionPane.showMessageDialog(null,"You have ended the round.");
+
                 updateCounterField();
 
                 origin = null;
@@ -411,7 +414,7 @@ public class GameMap {
         mainMapFrame.repaint();
     }
 
-    public void initReinforcementsField(){
+    public void initReinforcementsField() {
 
         labelReinforcements = new JLabel("", SwingConstants.CENTER);
         labelReinforcements.setText("(Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen.)");
@@ -441,6 +444,7 @@ public class GameMap {
         labelPlayer.setForeground(new Color(97, 91, 97));
     }
 
+
     public void updatePlayerField(){
 
         labelPlayer.setText("Player: " + GameLogic.currentPlayer);
@@ -459,9 +463,45 @@ public class GameMap {
         mainMapFrame.add(labelCounter);
     }
 
-    public void updateCounterField(){
+    public void updateCounterField() {
 
         labelCounter.setText("Runde: " + Integer.toString(GameLogic.round));
+    }
+
+    public void initEndField(boolean b){                //wird vorerst aufgerufen beim ersten drücken des Buttons "end this round"
+        JLabel labelEnd = new JLabel("",SwingConstants.CENTER);
+        JLabel labelEndFrame = new JLabel("",SwingConstants.CENTER);
+        mainMapPanel.add(labelEnd);
+        mainMapPanel.add(labelEndFrame);
+        Border border = LineBorder.createBlackLineBorder();
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {     //delets all Capitals in the Range of the Frame
+            int x = entry.getValue().getCapitalLocation().x;
+            int y = entry.getValue().getCapitalLocation().y;
+            if ( (x > 400 && x < 850) && (y > 200 && y < 450 ) ) {
+                entry.getValue().labelCapital.setText("");
+            }
+
+        }
+
+        String ans;
+        if (b) ans = "Gewonnen!";
+        else ans = "Verloren :(";
+
+        labelEnd.setText(ans);
+        labelEnd.setFont(new Font("Arial", Font.BOLD, 40));
+        labelEnd.setSize(400,200);
+        labelEnd.setLocation(425,225);
+        labelEnd.setForeground(Color.BLACK);
+        labelEnd.setBackground(new Color(255, 133, 8));
+        labelEnd.setOpaque(true);
+        labelEnd.setBorder(border);
+
+        labelEndFrame.setSize(440,240);
+        labelEndFrame.setLocation(405,205);
+        labelEndFrame.setBackground(new Color(205, 86, 11));
+        labelEndFrame.setOpaque(true);
+        labelEndFrame.setBorder(border);
     }
 
     private void initMainMapFrame(){
@@ -677,6 +717,7 @@ public class GameMap {
 
 
         if (origin != null){
+
             for(Polygon p : origin.getPatches()){
 
                 switch (GameLogic.currentPlayer){
@@ -726,7 +767,7 @@ public class GameMap {
             result += "     neighbors: " + "\n";
             for(Territory territory : entry.getValue().getNeighbors()){
 
-                result += "           " + territory.getName() + "\n";
+                result += "                " + territory.getName() + "\n";
             }
 
             result += "     patches:   ";
@@ -830,7 +871,7 @@ public class GameMap {
                 }
         }
 
-        System.out.println("origin: " + origin.getName());
+        System.out.println("origin: " + origin == null ? "null" : origin.getName());
         System.out.println("selectedTerritory: " + selectedTerritory.getName());
         System.out.println("currentPlayer: " + GameLogic.currentPlayer);
     }
