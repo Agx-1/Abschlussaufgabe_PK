@@ -116,5 +116,4 @@ public class Territory implements Occupyable {
 
         return name;
     }
-
 }

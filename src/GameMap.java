@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.font.LineBreakMeasurer;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
@@ -14,12 +13,13 @@ import java.util.*;
 public class GameMap {
 
     private Map<String, Territory> territories = new HashMap<>();
-    private Map<String, Continent> continents = new HashMap<>();
+    private LinkedList<Continent> continents = new LinkedList<>();
     private AI computerOpponent = new AI();
 
     private int reinforcements = 0;
     private Territory origin;       //origin of attack or reinforcement-distribution
     private boolean armyMoved = false;
+    private int winner = -1;
     private Territory moveFrom;
     private Territory moveTo;
 
@@ -56,19 +56,28 @@ public class GameMap {
 
     private class AI {
 
-        void makeMove(GameMap map){
+        void makeMove(){
 
             switch (GameLogic.phase){
 
                 case -1:
-                    claimPhase(claimTerritory(findByOccupied(-1, false)));
+                    claimPhase(claimTerritory());
                     break;
                 case 0:
                     while (reinforcements > 0){
-                        distributionPhase(distributeReinforcements(findByOccupied(0, false)));
+                        distributionPhase(distributeReinforcements());
                     }
                     break;
                 case 1:
+                    while (hasTerritoryToAttack()) {
+                        attackMovePhase(getAttackTarget());
+                    }
+                    origin = null;
+                    moveFrom = null;
+                    moveTo = null;
+                    armyMoved = false;
+
+                    nextPhase();
                     break;
             }
         }
@@ -94,48 +103,190 @@ public class GameMap {
             return result;
         }
 
-        Territory claimTerritory(LinkedList<Territory> unclaimedTerritories){
+        Territory claimTerritory(){
 
+//            boolean unclaimed;
+//            int friendlyNeighbors;          //'friendly' means either unclaimed or own territory
+//            LinkedList<Continent> unclaimedContinents = new LinkedList<>();
+//
+//            for (Continent continent : continents){
+//
+//                unclaimed = true;
+//
+//                for(Territory member : continent.getMembers()){
+//
+//                    if(member.getOccupied() != -1){
+//
+//                        unclaimed = false;
+//                    }
+//                }
+//
+//                if(unclaimed){
+//
+//                    unclaimedContinents.add(continent);
+//                }
+//            }
+//
+//            int continentChoice = (int)(Math.random()*unclaimedContinents.size())%unclaimedContinents.size();
+//
+//            for (Territory territory : unclaimedContinents.get(continentChoice).getMembers()){
+//
+//
+//            }
+
+            LinkedList<Territory> unclaimedTerritories = findByOccupied(-1, false);
             int choice = (int)(Math.random()*unclaimedTerritories.size())%unclaimedTerritories.size();
             return unclaimedTerritories.get(choice);
         }
 
-        Territory distributeReinforcements(LinkedList<Territory> ownTerritories){
+        Territory distributeReinforcements(){
 
 //            int choice = (int)(Math.random()*ownTerritories.size())%ownTerritories.size();
 //            return ownTerritories.get(choice);
 
-            //positive value: computer has 'deficit' armies less than possible attackers
-            //negative value; computer has 'deficit' armies more than possible attackers
+            //positive value: computer has 'deficit' armies more than possible attackers
+            //negative value; computer has 'deficit' armies less than possible attackers
             int deficit;
 
-            int maxDeficit = Integer.MIN_VALUE;
+            int maxDeficit = Integer.MAX_VALUE;
 
             Territory result = null;
 
-            for(Map.Entry<String, Territory> entry : GameMap.this.territories.entrySet()){
-
                 for(Territory territory : findByOccupied(0, false)){
 
-                    deficit = -territory.getArmies();
+                    deficit = territory.getArmies();
 
                     for(Territory neighbor : territory.getNeighbors()){
 
                         if(neighbor.getOccupied() != 0){
 
-                            deficit += neighbor.getArmies()-1;
+                            deficit -= neighbor.getArmies()-1;
                         }
                     }
 
-                    if(deficit > maxDeficit){
+                    if(deficit < maxDeficit){
 
                         maxDeficit = deficit;
                         result = territory;
                     }
-                }
             }
 
             return result;
+        }
+
+        Territory getAttackTarget() {
+
+            Territory result = null;
+
+            int deficit;
+            int minDeficit = Integer.MIN_VALUE;       //positive: more attacking armies, negative: more defending armies
+
+            for (Territory territory : findByOccupied(0, false)) {
+                for (Territory neighbor : territory.getNeighbors()) {
+
+                    if (neighbor.getOccupied() != 0) {
+
+                        deficit = territory.getArmies() - 1;
+                        deficit -= neighbor.getArmies();
+
+                        System.out.println("minDeficit: " + minDeficit);
+                        if (deficit > minDeficit) {
+
+                            minDeficit = deficit;
+                            origin = territory;
+                            System.out.println("origin(AI): " + origin.getName() + ": " + origin.getArmies());
+                            result = neighbor;
+                            System.out.println("result(AI): " + result.getName() + ": " + result.getArmies());
+                            System.out.println("new minDeficit: " + minDeficit);
+                        }
+                    }
+                }
+
+            }
+
+            System.out.println("minDeficit after for-loop: " + minDeficit);
+            if (minDeficit < 0) {
+                System.out.println("returning null...");
+                return null;
+            } else {
+                System.out.println("returning " + result.getName() + " with origin " + origin.getName());
+                return result;
+            }
+        }
+
+//        Territory getAttackOrigin(){
+//
+//            Territory result = null;
+//
+//            //positive value: computer has 'minDeficit' armies more than possible attackers
+//            //negative value; computer has 'minDeficit' armies less than possible attackers
+//            int minDeficit;
+//
+//            int minDeficit = Integer.MIN_VALUE;
+//
+//            for(Territory territory : findByOccupied(0, false)){
+//
+//                for(Territory neighbor : territory.getNeighbors()){
+//
+//                    if(neighbor.getOccupied() != 0){
+//
+//                        minDeficit = territory.getArmies()-1;
+//                        minDeficit -= neighbor.getArmies();
+//
+//                        System.out.println("minDeficit: " + minDeficit);
+//                        if(minDeficit > minDeficit){
+//
+//                            minDeficit = minDeficit;
+//
+//                            //System.out.println("origin(AI): " + origin.getName() + ": " + origin.getArmies());
+//                            result = territory;
+//                            System.out.println("result(AI): " + result.getName() + ": " + result.getArmies());
+//                            System.out.println("minDeficit: " + minDeficit);
+//                            System.out.println("new minDeficit: " + minDeficit);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            System.out.println("minDeficit after for-loop: " + minDeficit);
+//            if(minDeficit < 0){
+//                System.out.println("returning null...");
+//                return null;
+//            } else {
+//                return result;
+//            }
+//        }
+
+        boolean hasTerritoryToAttack(){
+
+            //positive value: computer has 'deficit' armies more than possible attackers
+            //negative value; computer has 'deficit' armies less than possible attackers
+            int deficit;
+
+            int minDeficit = Integer.MIN_VALUE;
+
+            for(Territory territory : findByOccupied(0, false)){
+
+                for(Territory neighbor : territory.getNeighbors()){
+
+                    if(neighbor.getOccupied() != 0){
+
+                        deficit = territory.getArmies()-1;
+                        deficit -= neighbor.getArmies();
+
+                        if(deficit > minDeficit){
+
+                            minDeficit = deficit;
+                        }
+                    }
+                }
+            }
+
+            if(minDeficit < 0){
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -280,20 +431,20 @@ public class GameMap {
         String name = line.substring(0, line.indexOf(':') - 3);
 //        System.out.println(name);
         int reinforcementBonus = Integer.parseInt(line.substring(name.length()+1,name.length()+2));
-//        System.out.println(reinforcementBonus);
+//        System.out.println(bonus);
         line = line.substring(name.length()+5);
         System.out.println(line);
 
-        LinkedList<String> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
+        LinkedList<Territory> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
 
         while (line.indexOf('-') > 0) {
-            members.add(line.substring(0, line.indexOf('-') - 1));
+            members.add(territories.get(line.substring(0, line.indexOf('-') - 1)));
             line = line.substring(line.indexOf('-') + 2);
         }
-        members.add(line);
+        members.add(territories.get(line));
 //        System.out.println(members);
 
-        continents.put(name, new Continent(reinforcementBonus, members));
+        continents.add(new Continent(name, reinforcementBonus, members));
 //        System.out.println(continents.keySet());
     }
 
@@ -375,9 +526,9 @@ public class GameMap {
 
                 armyMoved = false;
 
-                if(GameLogic.currentPlayer == 0){
+                if (GameLogic.currentPlayer == 0) {
                     nextPhase();
-                } else{
+                } else {
                     nextPlayer();
                 }
             }
@@ -396,12 +547,12 @@ public class GameMap {
         labelPhase.setText(phase);
         labelPhase.setFont(new Font("Arial", Font.BOLD, 20));
         labelPhase.setSize(500, 30);
-        labelPhase.setLocation(400,570);
+        labelPhase.setLocation(400, 570);
         labelPhase.setForeground(Color.BLACK);
 
         labelInstr.setText(instruction);
         labelInstr.setFont(new Font("Arial", Font.PLAIN, 17));
-        labelInstr.setSize(700,30);
+        labelInstr.setSize(700, 30);
         labelInstr.setLocation(300, 600);
         labelInstr.setForeground(Color.BLACK);
     }
@@ -444,7 +595,6 @@ public class GameMap {
         labelPlayer.setForeground(new Color(97, 91, 97));
     }
 
-
     public void updatePlayerField(){
 
         labelPlayer.setText("Player: " + GameLogic.currentPlayer);
@@ -485,8 +635,12 @@ public class GameMap {
         }
 
         String ans;
-        if (b) ans = "Gewonnen!";
-        else ans = "Verloren :(";
+        if (b){
+            ans = "Gewonnen!";
+
+        } else {
+            ans = "Verloren :(";
+        }
 
         labelEnd.setText(ans);
         labelEnd.setFont(new Font("Arial", Font.BOLD, 40));
@@ -502,6 +656,14 @@ public class GameMap {
         labelEndFrame.setBackground(new Color(205, 86, 11));
         labelEndFrame.setOpaque(true);
         labelEndFrame.setBorder(border);
+
+        this.b.setVisible(false);
+        labelCounter.setVisible(false);
+        labelPlayer.setVisible(false);
+        labelReinforcements.setVisible(false);
+        labelPhase.setVisible(false);
+        labelInstr.setVisible(false);
+        mainMapFrame.repaint();
     }
 
     private void initMainMapFrame(){
@@ -592,7 +754,6 @@ public class GameMap {
                             distributionPhase(selectedTerritory);
                             break;
                         case 1:
-                            System.out.println("attackPhase.");
                             attackMovePhase(selectedTerritory);
                             break;
                     }
@@ -607,7 +768,9 @@ public class GameMap {
 
                     System.out.println("Right Click");
 
-                    if(GameLogic.phase == 1 && selectedTerritory.getOccupied() == GameLogic.currentPlayer){
+                    if(GameLogic.phase == 1 &&
+                            selectedTerritory.getOccupied() == GameLogic.currentPlayer &&
+                            selectedTerritory.isNeighborOf(origin)){
 
                         if(selectedTerritory == GameLogic.getCurrentlyConquered()){
 
@@ -751,6 +914,7 @@ public class GameMap {
         }
 
         mainMapPanel.repaint();
+
     }
 
     @Override
@@ -785,15 +949,15 @@ public class GameMap {
             result += "\n";
         }
 
-        for (Map.Entry<String, Continent> entry : continents.entrySet()){
+        for (Continent continent : continents){
 
-            result += "Continent <" + entry.getKey() + ">\n";
-            result += "     bonus:   " + entry.getValue().reinforcementBonus + "\n";
+            result += "Continent <" + continent.getName() + ">\n";
+            result += "     bonus:   " + continent.getBonus() + "\n";
 
             result += "     members: ";
-            for (String member : entry.getValue().members){
+            for (Territory member : continent.getMembers()){
 
-                result += member;
+                result += member.getName();
                 result += "\n              ";
             }
 
@@ -862,7 +1026,6 @@ public class GameMap {
             System.out.println("origin set");
 
         } else{
-
             if(selectedTerritory.getName() != "" && origin != null)
                 if(origin.isNeighborOf(selectedTerritory)){
 
@@ -871,22 +1034,56 @@ public class GameMap {
                 }
         }
 
-        System.out.println("origin: " + origin == null ? "null" : origin.getName());
+        System.out.println("origin: " + (origin == null ? "null" : origin.getName()));
         System.out.println("selectedTerritory: " + selectedTerritory.getName());
         System.out.println("currentPlayer: " + GameLogic.currentPlayer);
+
+        mainMapPanel.repaint();
+
+
+        for (int i = 0; i < GameLogic.playerCount; i++) {
+
+            if(winner == -1) {
+                winner = i;
+            } else{
+                break;
+            }
+
+            for(Map.Entry<String, Territory> entry : territories.entrySet()){
+
+                if(entry.getValue().getOccupied() != i){
+
+                    winner = -1;
+                    break;
+                }
+            }
+        }
+
+        if(winner > -1){
+
+            switch (winner){
+
+                case 0:
+                    initEndField(false);
+                    break;
+                case 1:
+                    initEndField(true);
+                    break;
+            }
+        }
     }
 
     public void calculateReinforcements(){
 
         System.out.println("current player: " + GameLogic.currentPlayer);
 
-        for(Map.Entry<String, Continent> entry : continents.entrySet()){
+        for(Continent continent : continents){
 
             boolean continentBonus = true;
 
-            for (String territory : entry.getValue().members){
+            for (Territory territory : continent.getMembers()){
 
-                if(!(territories.get(territory).getOccupied() == GameLogic.currentPlayer)){
+                if(!(territories.get(territory.getName()).getOccupied() == GameLogic.currentPlayer)){
 
                     continentBonus = false;
                     break;
@@ -895,11 +1092,11 @@ public class GameMap {
 
             if(continentBonus){
 
-                reinforcements += entry.getValue().reinforcementBonus;
-                System.out.println("Reinforcements for " + entry.getKey() + ": " + entry.getValue().reinforcementBonus);
+                reinforcements += continent.getBonus();
+                System.out.println("Reinforcements for " + continent.getName() + ": " + continent.getBonus());
             } else{
 
-                System.out.println("Reinforcements for " + entry.getKey() + ": 0");
+                System.out.println("Reinforcements for " + continent.getName() + ": 0");
             }
         }
 
@@ -935,7 +1132,7 @@ public class GameMap {
 
         if(GameLogic.currentPlayer == 0){
 
-            computerOpponent.makeMove(this);
+            computerOpponent.makeMove();
         }
     }
 
@@ -969,5 +1166,30 @@ public class GameMap {
             labelReinforcements.setVisible(false);
         }
 
+    }
+
+    public void generateLostMap(){
+
+        int counter = 0;
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+            if(counter == 0){
+                entry.getValue().setOccupied(0);
+                entry.getValue().addReinforcement();
+            } else{
+                entry.getValue().setOccupied(1);
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+            }
+
+            counter++;
+        }
+
+        GameLogic.phase = 1;
+        GameLogic.currentPlayer = 1;
+        initButton();
     }
 }

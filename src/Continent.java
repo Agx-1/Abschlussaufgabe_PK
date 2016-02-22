@@ -5,12 +5,29 @@ import java.util.LinkedList;
  */
 public class Continent {
 
-    public final int reinforcementBonus;
-    public final LinkedList<String> members;
+    public final String name;
+    public final int bonus;
+    public final LinkedList<Territory> members;
 
-    public Continent(int reinforcementBonus, LinkedList<String> members){
+    public Continent(String name, int reinforcementBonus, LinkedList<Territory> members){
 
-        this.reinforcementBonus = reinforcementBonus;
+        this.name = name;
+        this.bonus = reinforcementBonus;
         this.members = members;
+    }
+
+    public String getName(){
+
+        return name;
+    }
+
+    public int getBonus(){
+
+        return bonus;
+    }
+
+    public LinkedList<Territory> getMembers(){
+
+        return members;
     }
 }
