@@ -28,12 +28,11 @@ public class GameMap {
 
     public boolean loadingFinished = false;
 
-    private JLabel labelPhase          = new JLabel("",SwingConstants.CENTER);
-    private JLabel labelInstr          = new JLabel("",SwingConstants.CENTER);
-    private JLabel labelReinforcements = new JLabel("",SwingConstants.CENTER);
-    private JLabel labelCounter        = new JLabel("",SwingConstants.LEFT);
-    private JLabel labelPlayer         = new JLabel("",SwingConstants.LEFT);
-    private JLabel horribleHackToRemove = new JLabel();                 //fix-up LayoutManager instead
+    private JLabel labelPhase          = new JLabel("");
+    private JLabel labelInstr          = new JLabel("");
+    private JLabel labelReinforcements = new JLabel("");
+    private JLabel labelCounter        = new JLabel("");
+    private JLabel labelPlayer         = new JLabel("");
 
     private JButton b = new JButton("end this round");
 
@@ -51,6 +50,7 @@ public class GameMap {
         initCounterField();
         initReinforcementsField();
 
+        mainMapFrame.setLayout(null);
         //mainMapFrame.add(horribleHackToRemove);
     }
 
@@ -507,10 +507,10 @@ public class GameMap {
 
         mainMapPanel.add(b);
 
-        b.setSize(150,30);
-        b.setLocation(1080,600);
+        b.setSize(150, 30);
+        b.setLocation(1080, 600);
         b.setFont(new Font("Arial", Font.BOLD, 14));
-        b.setBackground(new Color(0,0,102));
+        b.setBackground(new Color(0, 0, 102));
         b.setForeground(Color.WHITE);
 
         b.addActionListener(new ActionListener() {
@@ -573,6 +573,7 @@ public class GameMap {
         labelReinforcements.setSize(700, 30);
         labelReinforcements.setLocation(300, 618);
         labelReinforcements.setForeground(new Color(50, 50, 50));
+        labelReinforcements.setVisible(false);
         mainMapFrame.add(labelReinforcements);
     }
 
@@ -584,7 +585,7 @@ public class GameMap {
 
     public void initPlayerField(){
 
-        labelPlayer = new JLabel("", SwingConstants.CENTER);
+        labelPlayer = new JLabel("");
 
         mainMapFrame.add(labelPlayer);
 
@@ -672,10 +673,11 @@ public class GameMap {
 
         mainMapFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainMapFrame.setSize(1250, 650);
-        mainMapFrame.setBackground(new Color(0,153,204));
+        mainMapFrame.setBackground(new Color(0, 153, 204));
         mainMapFrame.setResizable(false);
         mainMapFrame.setVisible(true);
         mainMapFrame.setTitle("All Those Territories");
+
     }
 
     private void initMainMapPanel(){
@@ -702,10 +704,10 @@ public class GameMap {
             }
 
         };
+
         mainMapPanel.setLayout(null);
 
         initMouseAdapter();
-
         mainMapFrame.add(mainMapPanel);
         mainMapFrame.pack();
     }
