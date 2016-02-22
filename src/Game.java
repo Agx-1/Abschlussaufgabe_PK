@@ -3,7 +3,7 @@ import java.util.Arrays;
 /**
  * Created by Moritz on 15.01.2016.
  */
-public class GameLogic {        //class is probably obsolete, remove if finished
+public class Game {        //class is probably obsolete, remove if finished
 
     // -1 stands for claim phase, 0 for reinforce, 1 for attacking and moving
     public static int phase = -1;

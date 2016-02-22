@@ -17,9 +17,9 @@ public class GameMap {
     private AI computerOpponent = new AI();
 
     private int reinforcements = 0;
-    private Territory origin;       //origin of attack or reinforcement-distribution
     private boolean armyMoved = false;
     private int winner = -1;
+    private Territory origin;       //origin of attack or reinforcement-distribution
     private Territory moveFrom;
     private Territory moveTo;
 
@@ -42,23 +42,31 @@ public class GameMap {
         initMainMapFrame();
         initMainMapPanel();
 
-        createMap(readMapFile(path));
+        JMenuBar menuBar = new JMenuBar();
+        JMenu load = new JMenu("Load...");
+        menuBar.add(load);
+        JMenuItem loadMapFile = new JMenuItem("Load from file...");
+        load.add(loadMapFile);
+
+        mainMapPanel.add(menuBar);
+        mainMapFrame.setJMenuBar(menuBar);
+
+        loadMap(readMapFile(path));
 
         initCapital();
-        initTextField("Eroberungsphase:", "Such dir ein Territorium aus.");
+        initTextField("Claim Phase:", "Select a territory");
         initPlayerField();
         initCounterField();
         initReinforcementsField();
 
         mainMapFrame.setLayout(null);
-        //mainMapFrame.add(horribleHackToRemove);
     }
 
     private class AI {
 
         void makeMove(){
 
-            switch (GameLogic.phase){
+            switch (Game.phase){
 
                 case -1:
                     claimPhase(claimTerritory());
@@ -214,54 +222,9 @@ public class GameMap {
             }
         }
 
-//        Territory getAttackOrigin(){
-//
-//            Territory result = null;
-//
-//            //positive value: computer has 'minDeficit' armies more than possible attackers
-//            //negative value; computer has 'minDeficit' armies less than possible attackers
-//            int minDeficit;
-//
-//            int minDeficit = Integer.MIN_VALUE;
-//
-//            for(Territory territory : findByOccupied(0, false)){
-//
-//                for(Territory neighbor : territory.getNeighbors()){
-//
-//                    if(neighbor.getOccupied() != 0){
-//
-//                        minDeficit = territory.getArmies()-1;
-//                        minDeficit -= neighbor.getArmies();
-//
-//                        System.out.println("minDeficit: " + minDeficit);
-//                        if(minDeficit > minDeficit){
-//
-//                            minDeficit = minDeficit;
-//
-//                            //System.out.println("origin(AI): " + origin.getName() + ": " + origin.getArmies());
-//                            result = territory;
-//                            System.out.println("result(AI): " + result.getName() + ": " + result.getArmies());
-//                            System.out.println("minDeficit: " + minDeficit);
-//                            System.out.println("new minDeficit: " + minDeficit);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            System.out.println("minDeficit after for-loop: " + minDeficit);
-//            if(minDeficit < 0){
-//                System.out.println("returning null...");
-//                return null;
-//            } else {
-//                return result;
-//            }
-//        }
-
         boolean hasTerritoryToAttack(){
 
-            //positive value: computer has 'deficit' armies more than possible attackers
-            //negative value; computer has 'deficit' armies less than possible attackers
-            int deficit;
+            int deficit;        //positive: more attacking armies, negative: more defending armies
 
             int minDeficit = Integer.MIN_VALUE;
 
@@ -290,7 +253,7 @@ public class GameMap {
         }
     }
 
-    public void createMap(LinkedList<String> mapData) {
+    private void loadMap(LinkedList<String> mapData) {
 
 //        just for debugging
         for (String line : mapData){
@@ -302,19 +265,19 @@ public class GameMap {
 
             if(line.startsWith("patch-of")){
 
-                createPatch(line);
+                loadPatch(line);
             }
 
             if (line.startsWith("capital-of")) {
 
-                createCapital(line);
+                loadCapital(line);
             }
             if (line.startsWith("neighbors-of")){
 
-                createNeighbors(line);
+                loadNeighbors(line);
             }
             if (line.startsWith("continent")){
-                createContinent(line);
+                loadContinent(line);
             }
         }
 
@@ -322,7 +285,7 @@ public class GameMap {
         mainMapFrame.repaint();
     }
 
-    private void createPatch(String line){
+    private void loadPatch(String line){
 
         //saves the name of the territory in current line
         String territory;
@@ -366,7 +329,7 @@ public class GameMap {
         }
     }
 
-    private void createCapital(String line){
+    private void loadCapital(String line){
 
         String territory;
         String[] helperCoordinates;
@@ -403,7 +366,7 @@ public class GameMap {
 
     }
 
-    private void createNeighbors(String line){
+    private void loadNeighbors(String line){
         line = line.replace("neighbors-of ", "");
 
         String territory = line.substring(0,line.indexOf(':')-1);   //Name des Terretoriums
@@ -425,7 +388,7 @@ public class GameMap {
         territories.get(line).setNeighbor(territories.get(territory));
     }
 
-    private void createContinent(String line){
+    private void loadContinent(String line){
         line = line.replace("continent ", "");
 
         String name = line.substring(0, line.indexOf(':') - 3);
@@ -471,7 +434,130 @@ public class GameMap {
         return result;
     }
 
-    public void initCapital() {
+    private void drawMap(Graphics2D g2d){
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
+            g2d.setColor(Color.WHITE);
+            String from = entry.getKey();                                       //Von...
+            int fromX = entry.getValue().getCapitalLocation().x;
+            int fromY = entry.getValue().getCapitalLocation().y;
+
+            for(Territory neighbor : entry.getValue().getNeighbors()){
+
+                String to = neighbor.getName();
+                int toX = territories.get(to).getCapitalLocation().x;
+                int toY = territories.get(to).getCapitalLocation().y;
+
+                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                    g2d.drawLine(fromX, fromY, 0, fromY);
+                    g2d.drawLine(toX, toY, 1250, toY);
+                }
+                else {
+                    if (from.equals("Kamchatka") && to.equals("Alaska")) {
+                        g2d.drawLine(fromX,fromY,1250,fromY);
+                        g2d.drawLine(toX,toY,0,toY);
+                    }
+                    else{
+                        g2d.drawLine(fromX, fromY, toX, toY);
+                    }
+                }
+            }
+
+        }
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+
+            for (Polygon p : entry.getValue().getPatches()) {
+
+                switch (entry.getValue().getOccupied()){
+
+                    case -1: g2d.setColor(Color.LIGHT_GRAY);
+                        break;
+                    case 0: g2d.setColor(new Color(194,0,0));
+                        break;
+                    case 1: g2d.setColor(new Color(10,180,30));
+                        break;
+                }
+                g2d.fillPolygon(p);
+
+                g2d.setColor(Color.BLACK);
+                g2d.drawPolygon(p);
+            }
+        }
+
+
+        if (origin != null){
+
+            for(Polygon p : origin.getPatches()){
+
+                switch (Game.currentPlayer){
+                    case 0: g2d.setColor(new Color(245, 44, 24));
+                        break;
+                    case 1: g2d.setColor(new Color(92, 221, 73));
+                        break;
+                }
+
+                g2d.fillPolygon(p);
+                g2d.setColor(Color.WHITE);
+                g2d.drawPolygon(p);
+            }
+
+            for (Territory neighbor : origin.getNeighbors()){
+                for(Polygon p : territories.get(neighbor.getName()).getPatches()){
+
+                    switch (territories.get(neighbor.getName()).getOccupied()){
+
+                        case 0: g2d.setColor(new Color(245, 44, 24));
+                            break;
+                        case 1: g2d.setColor(new Color(92, 221, 73));
+                            break;
+                    }
+
+                    g2d.fillPolygon(p);
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawPolygon(p);
+                }
+            }
+        }
+
+        mainMapPanel.repaint();
+
+    }
+
+    private void initButton(){
+
+        mainMapPanel.add(b);
+
+        b.setSize(150, 30);
+        b.setLocation(1080, 585);
+        b.setFont(new Font("Arial", Font.BOLD, 14));
+        b.setBackground(new Color(0, 0, 102));
+        b.setForeground(Color.WHITE);
+
+        b.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //JOptionPane.showMessageDialog(null,"You have ended the round.");
+
+                updateCounterField();
+
+                origin = null;
+                moveFrom = null;
+                moveTo = null;
+
+                armyMoved = false;
+
+                if (Game.currentPlayer == 0) {
+                    nextPhase();
+                } else {
+                    nextPlayer();
+                }
+            }
+        });
+
+    }
+
+    private void initCapital() {
 
 //        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
@@ -503,123 +589,19 @@ public class GameMap {
         mainMapFrame.repaint();
     }
 
-    public void initButton(){
-
-        mainMapPanel.add(b);
-
-        b.setSize(150, 30);
-        b.setLocation(1080, 600);
-        b.setFont(new Font("Arial", Font.BOLD, 14));
-        b.setBackground(new Color(0, 0, 102));
-        b.setForeground(Color.WHITE);
-
-        b.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //JOptionPane.showMessageDialog(null,"You have ended the round.");
-
-                updateCounterField();
-
-                origin = null;
-                moveFrom = null;
-                moveTo = null;
-
-                armyMoved = false;
-
-                if (GameLogic.currentPlayer == 0) {
-                    nextPhase();
-                } else {
-                    nextPlayer();
-                }
-            }
-        });
-
-    }
-
-    public void initTextField(String phase, String instruction){
-
-        labelPhase = new JLabel("", SwingConstants.CENTER);
-        labelInstr = new JLabel("", SwingConstants.CENTER);
-
-        mainMapFrame.add(labelPhase);
-        mainMapFrame.add(labelInstr);
-
-        labelPhase.setText(phase);
-        labelPhase.setFont(new Font("Arial", Font.BOLD, 20));
-        labelPhase.setSize(500, 30);
-        labelPhase.setLocation(400, 570);
-        labelPhase.setForeground(Color.BLACK);
-
-        labelInstr.setText(instruction);
-        labelInstr.setFont(new Font("Arial", Font.PLAIN, 17));
-        labelInstr.setSize(700, 30);
-        labelInstr.setLocation(300, 600);
-        labelInstr.setForeground(Color.BLACK);
-    }
-
-    public void updateTextField(String phase, String instruction){
-
-        labelPhase.setText(phase);
-        labelInstr.setText(instruction);
-
-        mainMapFrame.repaint();
-    }
-
-    public void initReinforcementsField() {
-
-        labelReinforcements = new JLabel("", SwingConstants.CENTER);
-        labelReinforcements.setText("(Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen.)");
-        labelReinforcements.setFont(new Font("Courier New", Font.PLAIN, 15));
-        labelReinforcements.setSize(700, 30);
-        labelReinforcements.setLocation(300, 618);
-        labelReinforcements.setForeground(new Color(50, 50, 50));
-        labelReinforcements.setVisible(false);
-        mainMapFrame.add(labelReinforcements);
-    }
-
-    private void updateReinforcementsField(){
-
-        labelReinforcements.setText("Du hast noch " + Integer.toString(reinforcements) + " Verstärkungen");
-        mainMapFrame.repaint();
-    }
-
-    public void initPlayerField(){
-
-        labelPlayer = new JLabel("");
-
-        mainMapFrame.add(labelPlayer);
-
-        labelPlayer.setText("Player: " + Integer.toString(GameLogic.currentPlayer));
-        labelPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
-        labelPlayer.setSize(100, 20);
-        labelPlayer.setLocation(10, 610);
-        labelPlayer.setForeground(new Color(97, 91, 97));
-    }
-
-    public void updatePlayerField(){
-
-        labelPlayer.setText("Player: " + GameLogic.currentPlayer);
-        mainMapFrame.repaint();
-    }
-
-    public void initCounterField(){
+    private void initCounterField(){
         //mainMapPanel.add(labelCounter);
 
         labelCounter.setVisible(false);
-        labelCounter.setText("Runde: " + Integer.toString(GameLogic.round));
+        labelCounter.setText("Round: " + Integer.toString(Game.round));
         labelCounter.setFont(new Font("Arial", Font.PLAIN, 10));
         labelCounter.setSize(100,20);
-        labelCounter.setLocation(10, 625);
+        labelCounter.setLocation(10, 605);
         labelCounter.setForeground(new Color(97, 91, 97));
         mainMapFrame.add(labelCounter);
     }
 
-    public void updateCounterField() {
-
-        labelCounter.setText("Runde: " + Integer.toString(GameLogic.round));
-    }
-
-    public void initEndField(boolean b){                //wird vorerst aufgerufen beim ersten drücken des Buttons "end this round"
+    private void initEndField(boolean b){                //wird vorerst aufgerufen beim ersten drücken des Buttons "end this round"
         JLabel labelEnd = new JLabel("",SwingConstants.CENTER);
         JLabel labelEndFrame = new JLabel("",SwingConstants.CENTER);
         mainMapPanel.add(labelEnd);
@@ -637,10 +619,10 @@ public class GameMap {
 
         String ans;
         if (b){
-            ans = "Gewonnen!";
+            ans = "You won!";
 
         } else {
-            ans = "Verloren :(";
+            ans = "You lost :(";
         }
 
         labelEnd.setText(ans);
@@ -747,7 +729,7 @@ public class GameMap {
                         }
                     }
 
-                    switch (GameLogic.phase){
+                    switch (Game.phase){
 
                         case -1:
                             claimPhase(selectedTerritory);
@@ -760,9 +742,9 @@ public class GameMap {
                             break;
                     }
 
-                    if(selectedTerritory != GameLogic.getCurrentlyConquered()){
+                    if(selectedTerritory != Game.getCurrentlyConquered()){
 
-                        GameLogic.setCurrentlyConquered(null);
+                        Game.setCurrentlyConquered(null);
                     }
                 }
 
@@ -770,11 +752,11 @@ public class GameMap {
 
                     System.out.println("Right Click");
 
-                    if(GameLogic.phase == 1 &&
-                            selectedTerritory.getOccupied() == GameLogic.currentPlayer &&
+                    if(Game.phase == 1 &&
+                            selectedTerritory.getOccupied() == Game.currentPlayer &&
                             selectedTerritory.isNeighborOf(origin)){
 
-                        if(selectedTerritory == GameLogic.getCurrentlyConquered()){
+                        if(selectedTerritory == Game.getCurrentlyConquered()){
 
                             origin.moveArmyTo(selectedTerritory);
 
@@ -805,118 +787,301 @@ public class GameMap {
         mainMapPanel.addMouseListener(ma);
     }
 
-    private void drawMap(Graphics2D g2d){
+    private void initPlayerField(){
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
-            g2d.setColor(Color.WHITE);
-            String from = entry.getKey();                                       //Von...
-            int fromX = entry.getValue().getCapitalLocation().x;
-            int fromY = entry.getValue().getCapitalLocation().y;
+        labelPlayer = new JLabel("");
 
+        mainMapFrame.add(labelPlayer);
 
-            //TODO: change to foreach
-//            for (int i = 0; i < entry.getValue().getNeighbors().size(); i++) {
-//
-//                String to = entry.getValue().getNeighbors().get(i).getName();                              //Nach...
-//                int toX = territories.get(to).getCapitalLocation().x;
-//                int toY = territories.get(to).getCapitalLocation().y;
-//
-//
-//                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-//                    g2d.drawLine(fromX, fromY, 0, fromY);
-//                    g2d.drawLine(toX, toY, 1250, toY);
-//                }
-//                else {
-//                    if (from.equals("Kamchatka") && to.equals("Alaska")) {
-//                        g2d.drawLine(fromX,fromY,1250,fromY);
-//                        g2d.drawLine(toX,toY,0,toY);
-//                    }
-//                    else{
-//                        g2d.drawLine(fromX, fromY, toX, toY);
-//                    }
-//                }
-//            }
+        labelPlayer.setText("Player: " + Integer.toString(Game.currentPlayer));
+        labelPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
+        labelPlayer.setSize(100, 20);
+        labelPlayer.setLocation(10, 590);
+        labelPlayer.setForeground(new Color(97, 91, 97));
+    }
 
-            for(Territory neighbor : entry.getValue().getNeighbors()){
+    private void initReinforcementsField() {
 
-                String to = neighbor.getName();
-                int toX = territories.get(to).getCapitalLocation().x;
-                int toY = territories.get(to).getCapitalLocation().y;
+        labelReinforcements = new JLabel("", SwingConstants.CENTER);
+        labelReinforcements.setText("(You have " + Integer.toString(reinforcements) + " reinforcements left.)");
+        labelReinforcements.setFont(new Font("Courier New", Font.PLAIN, 15));
+        labelReinforcements.setSize(700, 30);
+        labelReinforcements.setLocation(300, 603);
+        labelReinforcements.setForeground(new Color(50, 50, 50));
+        labelReinforcements.setVisible(false);
+        mainMapFrame.add(labelReinforcements);
+    }
 
-                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
-                    g2d.drawLine(fromX, fromY, 0, fromY);
-                    g2d.drawLine(toX, toY, 1250, toY);
-                }
-                else {
-                    if (from.equals("Kamchatka") && to.equals("Alaska")) {
-                        g2d.drawLine(fromX,fromY,1250,fromY);
-                        g2d.drawLine(toX,toY,0,toY);
-                    }
-                    else{
-                        g2d.drawLine(fromX, fromY, toX, toY);
-                    }
-                }
-            }
+    private void initTextField(String phase, String instruction){
 
-        }
+        labelPhase = new JLabel("", SwingConstants.CENTER);
+        labelInstr = new JLabel("", SwingConstants.CENTER);
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+        mainMapFrame.add(labelPhase);
+        mainMapFrame.add(labelInstr);
 
-            for (Polygon p : entry.getValue().getPatches()) {
+        labelPhase.setText(phase);
+        labelPhase.setFont(new Font("Arial", Font.BOLD, 20));
+        labelPhase.setSize(500, 30);
+        labelPhase.setLocation(400, 555);
+        labelPhase.setForeground(Color.BLACK);
 
-                switch (entry.getValue().getOccupied()){
+        labelInstr.setText(instruction);
+        labelInstr.setFont(new Font("Arial", Font.PLAIN, 17));
+        labelInstr.setSize(700, 30);
+        labelInstr.setLocation(300, 585);
+        labelInstr.setForeground(Color.BLACK);
+    }
 
-                    case -1: g2d.setColor(Color.LIGHT_GRAY);
-                        break;
-                    case 0: g2d.setColor(new Color(194,0,0));
-                        break;
-                    case 1: g2d.setColor(new Color(10,180,30));
-                        break;
-                }
-                g2d.fillPolygon(p);
+    private void updateCounterField() {
 
-                g2d.setColor(Color.BLACK);
-                g2d.drawPolygon(p);
-            }
-        }
+        labelCounter.setText("Round: " + Integer.toString(Game.round));
+    }
 
+    private void updatePlayerField(){
 
-        if (origin != null){
+        labelPlayer.setText("Player: " + Game.currentPlayer);
+        mainMapFrame.repaint();
+    }
 
-            for(Polygon p : origin.getPatches()){
+    private void updateReinforcementsField(){
 
-                switch (GameLogic.currentPlayer){
-                    case 0: g2d.setColor(new Color(245, 44, 24));
-                        break;
-                    case 1: g2d.setColor(new Color(92, 221, 73));
-                        break;
-                }
+        labelReinforcements.setText("(You have " + Integer.toString(reinforcements) + " reinforcements left.)");
+        mainMapFrame.repaint();
+    }
 
-                g2d.fillPolygon(p);
-                g2d.setColor(Color.WHITE);
-                g2d.drawPolygon(p);
-            }
+    private void updateTextField(String phase, String instruction){
 
-            for (Territory neighbor : origin.getNeighbors()){
-                for(Polygon p : territories.get(neighbor.getName()).getPatches()){
+        labelPhase.setText(phase);
+        labelInstr.setText(instruction);
 
-                    switch (territories.get(neighbor.getName()).getOccupied()){
+        mainMapFrame.repaint();
+    }
 
-                        case 0: g2d.setColor(new Color(245, 44, 24));
-                            break;
-                        case 1: g2d.setColor(new Color(92, 221, 73));
-                            break;
-                    }
+    private void claimPhase(Territory selectedTerritory){
 
-                    g2d.fillPolygon(p);
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawPolygon(p);
-                }
+        if (selectedTerritory.getOccupied() == -1) {
+
+            //System.out.println("Clicked polygon");  //debugging only
+            selectedTerritory.setOccupied(Game.currentPlayer);
+            selectedTerritory.addReinforcement();
+            selectedTerritory.labelCapital.setText("" + selectedTerritory.getArmies());
+
+            Game.occupiedTerritories++;
+
+            if(territories.size() == Game.occupiedTerritories){
+
+                nextPhase();
+                labelCounter.setVisible(true);
+                initButton();
+
+            } else{
+
+                nextPlayer();
             }
         }
+    }
+
+    private void distributionPhase(Territory selectedTerritory){
+
+        if(selectedTerritory.getOccupied() == Game.currentPlayer){
+
+            if(reinforcements > 0){
+
+                selectedTerritory.addReinforcement();
+                reinforcements--;
+                System.out.println("remaining reinforcements: " + reinforcements);
+
+                if(reinforcements == 0){
+
+                    if(Game.currentPlayer == 0){
+
+                        nextPhase();
+
+                    } else{
+
+                        nextPlayer();
+                    }
+                }
+            }
+        }
+
+        updateReinforcementsField();
+    }
+
+    private void attackMovePhase(Territory selectedTerritory){
+
+        if(selectedTerritory.getOccupied() == Game.currentPlayer){
+
+            origin = selectedTerritory;
+            System.out.println("origin set");
+
+        } else{
+            if(selectedTerritory.getName() != "" && origin != null)
+                if(origin.isNeighborOf(selectedTerritory)){
+
+                    System.out.println("attacking...");
+                    Game.attack(origin, selectedTerritory);
+                }
+        }
+
+        System.out.println("origin: " + (origin == null ? "null" : origin.getName()));
+        System.out.println("selectedTerritory: " + selectedTerritory.getName());
+        System.out.println("currentPlayer: " + Game.currentPlayer);
 
         mainMapPanel.repaint();
 
+
+        for (int i = 0; i < Game.playerCount; i++) {
+
+            if(winner == -1) {
+                winner = i;
+            } else{
+                break;
+            }
+
+            for(Map.Entry<String, Territory> entry : territories.entrySet()){
+
+                if(entry.getValue().getOccupied() != i){
+
+                    winner = -1;
+                    break;
+                }
+            }
+        }
+
+        if(winner > -1){
+
+            switch (winner){
+
+                case 0:
+                    initEndField(false);
+                    break;
+                case 1:
+                    initEndField(true);
+                    break;
+            }
+        }
+    }
+
+    public void calculateReinforcements(){
+
+        System.out.println("current player: " + Game.currentPlayer);
+
+        for(Continent continent : continents){
+
+            boolean continentBonus = true;
+
+            for (Territory territory : continent.getMembers()){
+
+                if(!(territories.get(territory.getName()).getOccupied() == Game.currentPlayer)){
+
+                    continentBonus = false;
+                    break;
+                }
+            }
+
+            if(continentBonus){
+
+                reinforcements += continent.getBonus();
+                System.out.println("Reinforcements for " + continent.getName() + ": " + continent.getBonus());
+            } else{
+
+                System.out.println("Reinforcements for " + continent.getName() + ": 0");
+            }
+        }
+
+        int occupiedTerritories = 0;
+
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+            if(Game.currentPlayer == entry.getValue().getOccupied()){
+
+                occupiedTerritories++;
+            }
+        }
+
+        System.out.println("reinforcements for territories: " + occupiedTerritories/3);
+        reinforcements += occupiedTerritories/3;
+        reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
+        System.out.println("reinforcements total: " + reinforcements);
+
+        updateReinforcementsField();
+    }
+
+    private void nextPlayer(){
+
+        Game.currentPlayer++;
+        Game.currentPlayer %= Game.playerCount;
+
+        if(Game.phase == 0){
+
+            calculateReinforcements();
+        }
+
+        updatePlayerField();
+
+        if(Game.currentPlayer == 0){
+
+            computerOpponent.makeMove();
+        }
+    }
+
+    private void nextPhase(){
+
+        Game.currentPlayer = 1;
+        updatePlayerField();
+
+        Game.phase++;
+        if(Game.phase / 2 == 1){
+
+            Game.round++;
+            updateCounterField();
+        }
+        Game.phase %= 2;
+
+        if(Game.phase == 0){
+
+            b.setVisible(false);
+            calculateReinforcements();
+            labelReinforcements.setVisible(true);
+            updateTextField("Reinforcement phase", "Distribute your reinforcements");
+
+
+        }
+
+        if(Game.phase == 1){
+
+            b.setVisible(true);
+            updateTextField("Attacking phase", "Right click to move armies");
+            labelReinforcements.setVisible(false);
+        }
+
+    }
+
+    public void generateLostMap(){
+
+        int counter = 0;
+        for (Map.Entry<String, Territory> entry : territories.entrySet()){
+
+            if(counter == 0){
+                entry.getValue().setOccupied(0);
+                entry.getValue().addReinforcement();
+            } else{
+                entry.getValue().setOccupied(1);
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+                entry.getValue().addReinforcement();
+            }
+
+            counter++;
+        }
+
+        Game.phase = 1;
+        Game.currentPlayer = 1;
+        initButton();
     }
 
     @Override
@@ -928,7 +1093,7 @@ public class GameMap {
 
             result += "Territory <" +  entry.getKey() + ">\n";
             result += "     capital:   [" + entry.getValue().getCapitalLocation().x + ", " +
-                                    entry.getValue().getCapitalLocation().y + "]\n";
+                    entry.getValue().getCapitalLocation().y + "]\n";
 
             result += "     neighbors: " + "\n";
             for(Territory territory : entry.getValue().getNeighbors()){
@@ -967,231 +1132,5 @@ public class GameMap {
         }
 
         return  result;
-    }
-
-    public void claimPhase(Territory selectedTerritory){
-
-        if (selectedTerritory.getOccupied() == -1) {
-
-            //System.out.println("Clicked polygon");  //debugging only
-            selectedTerritory.setOccupied(GameLogic.currentPlayer);
-            selectedTerritory.addReinforcement();
-            selectedTerritory.labelCapital.setText("" + selectedTerritory.getArmies());
-
-            GameLogic.occupiedTerritories++;
-
-            if(territories.size() == GameLogic.occupiedTerritories){
-
-                nextPhase();
-                labelCounter.setVisible(true);
-                initButton();
-
-            } else{
-
-                nextPlayer();
-            }
-        }
-    }
-
-    private void distributionPhase(Territory selectedTerritory){
-
-        if(selectedTerritory.getOccupied() == GameLogic.currentPlayer){
-
-            if(reinforcements > 0){
-
-                selectedTerritory.addReinforcement();
-                reinforcements--;
-                System.out.println("remaining reinforcements: " + reinforcements);
-
-                if(reinforcements == 0){
-
-                    if(GameLogic.currentPlayer == 0){
-
-                        nextPhase();
-
-                    } else{
-
-                        nextPlayer();
-                    }
-                }
-            }
-        }
-
-        updateReinforcementsField();
-    }
-
-    private void attackMovePhase(Territory selectedTerritory){
-
-        if(selectedTerritory.getOccupied() == GameLogic.currentPlayer){
-
-            origin = selectedTerritory;
-            System.out.println("origin set");
-
-        } else{
-            if(selectedTerritory.getName() != "" && origin != null)
-                if(origin.isNeighborOf(selectedTerritory)){
-
-                    System.out.println("attacking...");
-                    GameLogic.attack(origin, selectedTerritory);
-                }
-        }
-
-        System.out.println("origin: " + (origin == null ? "null" : origin.getName()));
-        System.out.println("selectedTerritory: " + selectedTerritory.getName());
-        System.out.println("currentPlayer: " + GameLogic.currentPlayer);
-
-        mainMapPanel.repaint();
-
-
-        for (int i = 0; i < GameLogic.playerCount; i++) {
-
-            if(winner == -1) {
-                winner = i;
-            } else{
-                break;
-            }
-
-            for(Map.Entry<String, Territory> entry : territories.entrySet()){
-
-                if(entry.getValue().getOccupied() != i){
-
-                    winner = -1;
-                    break;
-                }
-            }
-        }
-
-        if(winner > -1){
-
-            switch (winner){
-
-                case 0:
-                    initEndField(false);
-                    break;
-                case 1:
-                    initEndField(true);
-                    break;
-            }
-        }
-    }
-
-    public void calculateReinforcements(){
-
-        System.out.println("current player: " + GameLogic.currentPlayer);
-
-        for(Continent continent : continents){
-
-            boolean continentBonus = true;
-
-            for (Territory territory : continent.getMembers()){
-
-                if(!(territories.get(territory.getName()).getOccupied() == GameLogic.currentPlayer)){
-
-                    continentBonus = false;
-                    break;
-                }
-            }
-
-            if(continentBonus){
-
-                reinforcements += continent.getBonus();
-                System.out.println("Reinforcements for " + continent.getName() + ": " + continent.getBonus());
-            } else{
-
-                System.out.println("Reinforcements for " + continent.getName() + ": 0");
-            }
-        }
-
-        int occupiedTerritories = 0;
-
-        for (Map.Entry<String, Territory> entry : territories.entrySet()){
-
-            if(GameLogic.currentPlayer == entry.getValue().getOccupied()){
-
-                occupiedTerritories++;
-            }
-        }
-
-        System.out.println("reinforcements for territories: " + occupiedTerritories/3);
-        reinforcements += occupiedTerritories/3;
-        reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
-        System.out.println("reinforcements total: " + reinforcements);
-
-        updateReinforcementsField();
-    }
-
-    private void nextPlayer(){
-
-        GameLogic.currentPlayer++;
-        GameLogic.currentPlayer %= GameLogic.playerCount;
-
-        if(GameLogic.phase == 0){
-
-            calculateReinforcements();
-        }
-
-        updatePlayerField();
-
-        if(GameLogic.currentPlayer == 0){
-
-            computerOpponent.makeMove();
-        }
-    }
-
-    private void nextPhase(){
-
-        GameLogic.currentPlayer = 1;
-        updatePlayerField();
-
-        GameLogic.phase++;
-        if(GameLogic.phase / 2 == 1){
-
-            GameLogic.round++;
-            updateCounterField();
-        }
-        GameLogic.phase %= 2;
-
-        if(GameLogic.phase == 0){
-
-            b.setVisible(false);
-            calculateReinforcements();
-            labelReinforcements.setVisible(true);
-            updateTextField("Verstärkungsphase", "Verteile deine Armeen");
-
-
-        }
-
-        if(GameLogic.phase == 1){
-
-            b.setVisible(true);
-            updateTextField("Attacking", "Let's start rumbling");
-            labelReinforcements.setVisible(false);
-        }
-
-    }
-
-    public void generateLostMap(){
-
-        int counter = 0;
-        for (Map.Entry<String, Territory> entry : territories.entrySet()){
-
-            if(counter == 0){
-                entry.getValue().setOccupied(0);
-                entry.getValue().addReinforcement();
-            } else{
-                entry.getValue().setOccupied(1);
-                entry.getValue().addReinforcement();
-                entry.getValue().addReinforcement();
-                entry.getValue().addReinforcement();
-                entry.getValue().addReinforcement();
-                entry.getValue().addReinforcement();
-            }
-
-            counter++;
-        }
-
-        GameLogic.phase = 1;
-        GameLogic.currentPlayer = 1;
-        initButton();
     }
 }
