@@ -85,8 +85,6 @@ public class Game {        //class is probably obsolete, remove if finished
 
             System.out.print(defenderDices[i] + ", ");
         }
-        System.out.println();
-        System.out.println();
 
         //taking the minimum assures the index staying in the array, even if there are more defenders than attackers
         for (int i = 0; i < Math.min(defenderDices.length, attackerDices.length); i++) {
@@ -111,6 +109,8 @@ public class Game {        //class is probably obsolete, remove if finished
                     attacker.removeArmy();
                 }
 
+                System.out.println();
+                System.out.println();
                 System.out.printf("<%s> occupied <%s> with %d armies.\n\n",
                         attacker.getName(), defender.getName(), attackerDices.length);
             }
