@@ -31,7 +31,7 @@ public class GameMap {
     private JLabel labelPhase          = new JLabel("");
     private JLabel labelInstr          = new JLabel("");
     private JLabel labelReinforcements = new JLabel("");
-    private JLabel labelCounter        = new JLabel("");
+    private JLabel labelRound = new JLabel("");
     private JLabel labelPlayer         = new JLabel("");
 
     private JButton b = new JButton("end this round");
@@ -56,7 +56,7 @@ public class GameMap {
         initCapital();
         initTextField("Claim Phase:", "Select a territory");
         initPlayerField();
-        initCounterField();
+        initRoundLabel();
         initReinforcementsField();
 
         mainMapFrame.setLayout(null);
@@ -202,22 +202,16 @@ public class GameMap {
 
                             minDeficit = deficit;
                             origin = territory;
-                            System.out.println("origin(AI): " + origin.getName() + ": " + origin.getArmies());
                             result = neighbor;
-                            System.out.println("result(AI): " + result.getName() + ": " + result.getArmies());
-                            System.out.println("new minDeficit: " + minDeficit);
                         }
                     }
                 }
 
             }
 
-            System.out.println("minDeficit after for-loop: " + minDeficit);
             if (minDeficit < 0) {
-                System.out.println("returning null...");
                 return null;
             } else {
-                System.out.println("returning " + result.getName() + " with origin " + origin.getName());
                 return result;
             }
         }
@@ -255,25 +249,15 @@ public class GameMap {
 
     private void loadMap(LinkedList<String> mapData) {
 
-//        just for debugging
-        for (String line : mapData){
-//            System.out.println(line);
-        }
-//        ------------------
-
         for (String line : mapData){
 
             if(line.startsWith("patch-of")){
-
                 loadPatch(line);
             }
-
             if (line.startsWith("capital-of")) {
-
                 loadCapital(line);
             }
             if (line.startsWith("neighbors-of")){
-
                 loadNeighbors(line);
             }
             if (line.startsWith("continent")){
@@ -369,10 +353,10 @@ public class GameMap {
     private void loadNeighbors(String line){
         line = line.replace("neighbors-of ", "");
 
-        String territory = line.substring(0,line.indexOf(':')-1);   //Name des Terretoriums
+        String territory = line.substring(0,line.indexOf(':')-1);   //name of territory
         String neighbor;
 
-        line = line.substring(line.indexOf(':') + 2);               //Name und Doppelpunkt wegstreichen
+        line = line.substring(line.indexOf(':') + 2);               //delete name and colon
 
         while (line.indexOf('-') > 0) {
 
@@ -392,23 +376,21 @@ public class GameMap {
         line = line.replace("continent ", "");
 
         String name = line.substring(0, line.indexOf(':') - 3);
-//        System.out.println(name);
+
         int reinforcementBonus = Integer.parseInt(line.substring(name.length()+1,name.length()+2));
-//        System.out.println(bonus);
+
         line = line.substring(name.length()+5);
         System.out.println(line);
 
-        LinkedList<Territory> members = new LinkedList<>();         //zu "members" umbenannt, damit keine verwechslung mit territories aufkommt
+        LinkedList<Territory> members = new LinkedList<>();     //called 'members' to avoid confusion with 'territories'
 
         while (line.indexOf('-') > 0) {
             members.add(territories.get(line.substring(0, line.indexOf('-') - 1)));
             line = line.substring(line.indexOf('-') + 2);
         }
         members.add(territories.get(line));
-//        System.out.println(members);
 
         continents.add(new Continent(name, reinforcementBonus, members));
-//        System.out.println(continents.keySet());
     }
 
     private LinkedList<String> readMapFile(String path){
@@ -436,9 +418,9 @@ public class GameMap {
 
     private void drawMap(Graphics2D g2d){
 
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {      //Zeichnet linien zwischen den Capitals der Nachbarn
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) { //draws lines between capitals of neighbors
             g2d.setColor(Color.WHITE);
-            String from = entry.getKey();                                       //Von...
+            String from = entry.getKey();                                       //From...
             int fromX = entry.getValue().getCapitalLocation().x;
             int fromY = entry.getValue().getCapitalLocation().y;
 
@@ -448,7 +430,7 @@ public class GameMap {
                 int toX = territories.get(to).getCapitalLocation().x;
                 int toY = territories.get(to).getCapitalLocation().y;
 
-                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //Außnahme behandeln
+                if (from.equals("Alaska") && to.equals("Kamchatka")) {       //special case
                     g2d.drawLine(fromX, fromY, 0, fromY);
                     g2d.drawLine(toX, toY, 1250, toY);
                 }
@@ -537,9 +519,8 @@ public class GameMap {
         b.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //JOptionPane.showMessageDialog(null,"You have ended the round.");
 
-                updateCounterField();
+                updateRoundLabel();
 
                 origin = null;
                 moveFrom = null;
@@ -558,8 +539,6 @@ public class GameMap {
     }
 
     private void initCapital() {
-
-//        Border border = BorderFactory.createLineBorder(Color.BLACK); //for showing the position of the Label
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
@@ -589,64 +568,15 @@ public class GameMap {
         mainMapFrame.repaint();
     }
 
-    private void initCounterField(){
-        //mainMapPanel.add(labelCounter);
+    private void initRoundLabel(){
 
-        labelCounter.setVisible(false);
-        labelCounter.setText("Round: " + Integer.toString(Game.round));
-        labelCounter.setFont(new Font("Arial", Font.PLAIN, 10));
-        labelCounter.setSize(100,20);
-        labelCounter.setLocation(10, 605);
-        labelCounter.setForeground(new Color(97, 91, 97));
-        mainMapFrame.add(labelCounter);
-    }
-
-    private void initEndField(boolean b){                //wird vorerst aufgerufen beim ersten drücken des Buttons "end this round"
-        JLabel labelEnd = new JLabel("",SwingConstants.CENTER);
-        JLabel labelEndFrame = new JLabel("",SwingConstants.CENTER);
-        mainMapPanel.add(labelEnd);
-        mainMapPanel.add(labelEndFrame);
-        Border border = LineBorder.createBlackLineBorder();
-
-        for (Map.Entry<String, Territory> entry : territories.entrySet()) {     //delets all Capitals in the Range of the Frame
-            int x = entry.getValue().getCapitalLocation().x;
-            int y = entry.getValue().getCapitalLocation().y;
-            if ( (x > 400 && x < 850) && (y > 200 && y < 450 ) ) {
-                entry.getValue().labelCapital.setText("");
-            }
-
-        }
-
-        String ans;
-        if (b){
-            ans = "You won!";
-
-        } else {
-            ans = "You lost :(";
-        }
-
-        labelEnd.setText(ans);
-        labelEnd.setFont(new Font("Arial", Font.BOLD, 40));
-        labelEnd.setSize(400,200);
-        labelEnd.setLocation(425,225);
-        labelEnd.setForeground(Color.BLACK);
-        labelEnd.setBackground(new Color(255, 133, 8));
-        labelEnd.setOpaque(true);
-        labelEnd.setBorder(border);
-
-        labelEndFrame.setSize(440,240);
-        labelEndFrame.setLocation(405,205);
-        labelEndFrame.setBackground(new Color(205, 86, 11));
-        labelEndFrame.setOpaque(true);
-        labelEndFrame.setBorder(border);
-
-        this.b.setVisible(false);
-        labelCounter.setVisible(false);
-        labelPlayer.setVisible(false);
-        labelReinforcements.setVisible(false);
-        labelPhase.setVisible(false);
-        labelInstr.setVisible(false);
-        mainMapFrame.repaint();
+        labelRound.setVisible(false);
+        labelRound.setText("Round: " + Integer.toString(Game.round));
+        labelRound.setFont(new Font("Arial", Font.PLAIN, 10));
+        labelRound.setSize(100, 20);
+        labelRound.setLocation(10, 605);
+        labelRound.setForeground(new Color(97, 91, 97));
+        mainMapFrame.add(labelRound);
     }
 
     private void initMainMapFrame(){
@@ -669,14 +599,12 @@ public class GameMap {
             @Override
             protected void paintComponent(Graphics g) {
 
-                //super.paintComponent(g);      //maybe needed if some Component is ONLY added to JFrame
                 if (loadingFinished) {
 
                     Graphics2D g2d = (Graphics2D) g;
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                     drawMap(g2d);
-                    //else highlightNeighborsOf(selectedTerritory);
                 }
             }
 
@@ -701,8 +629,6 @@ public class GameMap {
             @Override
             public void mouseClicked(MouseEvent me) {
 
-                //super.mouseClicked(me);       //probably not needed, try to uncomment on strange mouse behaviour
-
                 Territory selectedTerritory = null;
 
                 findClickedTerritory:
@@ -720,8 +646,6 @@ public class GameMap {
 
                 if(SwingUtilities.isLeftMouseButton(me) && selectedTerritory != null){
 
-                    System.out.println("Left Click");
-
                     if (moveTo != null && moveFrom != null) {
                         if(!(origin == moveFrom || origin == moveTo)){
 
@@ -730,7 +654,6 @@ public class GameMap {
                     }
 
                     switch (Game.phase){
-
                         case -1:
                             claimPhase(selectedTerritory);
                             break;
@@ -749,8 +672,6 @@ public class GameMap {
                 }
 
                 if(SwingUtilities.isRightMouseButton(me) && selectedTerritory != null){
-
-                    System.out.println("Right Click");
 
                     if(Game.phase == 1 &&
                             selectedTerritory.getOccupied() == Game.currentPlayer &&
@@ -833,18 +754,18 @@ public class GameMap {
         labelInstr.setForeground(Color.BLACK);
     }
 
-    private void updateCounterField() {
+    private void updateRoundLabel() {
 
-        labelCounter.setText("Round: " + Integer.toString(Game.round));
+        labelRound.setText("Round: " + Integer.toString(Game.round));
     }
 
-    private void updatePlayerField(){
+    private void updatePlayerLabel(){
 
         labelPlayer.setText("Player: " + Game.currentPlayer);
         mainMapFrame.repaint();
     }
 
-    private void updateReinforcementsField(){
+    private void updateReinforcementsLabel(){
 
         labelReinforcements.setText("(You have " + Integer.toString(reinforcements) + " reinforcements left.)");
         mainMapFrame.repaint();
@@ -862,7 +783,6 @@ public class GameMap {
 
         if (selectedTerritory.getOccupied() == -1) {
 
-            //System.out.println("Clicked polygon");  //debugging only
             selectedTerritory.setOccupied(Game.currentPlayer);
             selectedTerritory.addReinforcement();
             selectedTerritory.labelCapital.setText("" + selectedTerritory.getArmies());
@@ -872,7 +792,7 @@ public class GameMap {
             if(territories.size() == Game.occupiedTerritories){
 
                 nextPhase();
-                labelCounter.setVisible(true);
+                labelRound.setVisible(true);
                 initButton();
 
             } else{
@@ -906,7 +826,7 @@ public class GameMap {
             }
         }
 
-        updateReinforcementsField();
+        updateReinforcementsLabel();
     }
 
     private void attackMovePhase(Territory selectedTerritory){
@@ -920,14 +840,9 @@ public class GameMap {
             if(selectedTerritory.getName() != "" && origin != null)
                 if(origin.isNeighborOf(selectedTerritory)){
 
-                    System.out.println("attacking...");
                     Game.attack(origin, selectedTerritory);
                 }
         }
-
-        System.out.println("origin: " + (origin == null ? "null" : origin.getName()));
-        System.out.println("selectedTerritory: " + selectedTerritory.getName());
-        System.out.println("currentPlayer: " + Game.currentPlayer);
 
         mainMapPanel.repaint();
 
@@ -955,18 +870,66 @@ public class GameMap {
             switch (winner){
 
                 case 0:
-                    initEndField(false);
+                    displayEndMessage(false);
                     break;
                 case 1:
-                    initEndField(true);
+                    displayEndMessage(true);
                     break;
             }
         }
     }
 
-    public void calculateReinforcements(){
+    private void displayEndMessage(boolean b){
 
-        System.out.println("current player: " + Game.currentPlayer);
+        JLabel labelEnd = new JLabel("",SwingConstants.CENTER);
+        JLabel labelEndFrame = new JLabel("",SwingConstants.CENTER);
+        mainMapPanel.add(labelEnd);
+        mainMapPanel.add(labelEndFrame);
+        Border border = LineBorder.createBlackLineBorder();
+
+        //deletes all Capitals in the Range of the Frame
+        for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+            int x = entry.getValue().getCapitalLocation().x;
+            int y = entry.getValue().getCapitalLocation().y;
+            if ( (x > 400 && x < 850) && (y > 200 && y < 450 ) ) {
+                entry.getValue().labelCapital.setText("");
+            }
+
+        }
+
+        String ans;
+        if (b){
+            ans = "You won!";
+
+        } else {
+            ans = "You lost :(";
+        }
+
+        labelEnd.setText(ans);
+        labelEnd.setFont(new Font("Arial", Font.BOLD, 40));
+        labelEnd.setSize(400,200);
+        labelEnd.setLocation(425,225);
+        labelEnd.setForeground(Color.BLACK);
+        labelEnd.setBackground(new Color(255, 133, 8));
+        labelEnd.setOpaque(true);
+        labelEnd.setBorder(border);
+
+        labelEndFrame.setSize(440,240);
+        labelEndFrame.setLocation(405,205);
+        labelEndFrame.setBackground(new Color(205, 86, 11));
+        labelEndFrame.setOpaque(true);
+        labelEndFrame.setBorder(border);
+
+        this.b.setVisible(false);
+        labelRound.setVisible(false);
+        labelPlayer.setVisible(false);
+        labelReinforcements.setVisible(false);
+        labelPhase.setVisible(false);
+        labelInstr.setVisible(false);
+        mainMapFrame.repaint();
+    }
+
+    public void calculateReinforcements(){
 
         for(Continent continent : continents){
 
@@ -1006,7 +969,7 @@ public class GameMap {
         reinforcements = Math.max(reinforcements, 3);           //player gets at least 3 reinforcements
         System.out.println("reinforcements total: " + reinforcements);
 
-        updateReinforcementsField();
+        updateReinforcementsLabel();
     }
 
     private void nextPlayer(){
@@ -1019,7 +982,7 @@ public class GameMap {
             calculateReinforcements();
         }
 
-        updatePlayerField();
+        updatePlayerLabel();
 
         if(Game.currentPlayer == 0){
 
@@ -1030,13 +993,13 @@ public class GameMap {
     private void nextPhase(){
 
         Game.currentPlayer = 1;
-        updatePlayerField();
+        updatePlayerLabel();
 
         Game.phase++;
         if(Game.phase / 2 == 1){
 
             Game.round++;
-            updateCounterField();
+            updateRoundLabel();
         }
         Game.phase %= 2;
 
