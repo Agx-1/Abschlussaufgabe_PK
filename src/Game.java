@@ -22,6 +22,9 @@ public class Game {        //class is probably obsolete, remove if finished
         final int maxAttackers = 3;      //how many armies can attack at once
         final int maxDefenders = 2;      //how many armies can defend at once
 
+        System.out.printf("Player %d attacks <%s> from <%s> \n",
+                Game.currentPlayer, defender.getName(), attacker.getName());
+
         if(attacker.getArmies() > maxAttackers){
 
             attackerDices = new int[maxAttackers];
@@ -70,14 +73,14 @@ public class Game {        //class is probably obsolete, remove if finished
         defenderDices = reverse(defenderDices);
 
         //just for testing, remove if finished
-        System.out.println("Attacker Array: ");
+        System.out.print("Attacker Array: ");
         for (int i = 0; i < attackerDices.length; i++) {
 
             System.out.print(attackerDices[i] + ", ");
         }
 
         System.out.println();
-        System.out.println("Defender Array: ");
+        System.out.print("Defender Array: ");
         for (int i = 0; i < defenderDices.length; i++) {
 
             System.out.print(defenderDices[i] + ", ");
@@ -91,12 +94,12 @@ public class Game {        //class is probably obsolete, remove if finished
                 if (attackerDices[i] > defenderDices[i]) {
 
                     defender.removeArmy();
-                    System.out.println("One defender died.");
+                    //System.out.println("One defender died.");
 
                 } else {
 
                     attacker.removeArmy();
-                    System.out.println("One attacker died.");
+                    //System.out.println("One attacker died.");
                 }
 
             if(defender.getArmies() == 0){
@@ -108,12 +111,18 @@ public class Game {        //class is probably obsolete, remove if finished
                     attacker.removeArmy();
                 }
 
-                System.out.println("Attacker occupied territory with " + attackerDices.length + " armies.");
+                System.out.printf("<%s> occupied <%s> with %d armies.\n\n",
+                        attacker.getName(), defender.getName(), attackerDices.length);
             }
         }
 
-        System.out.println("Armies defender: " + defender.getArmies());
-        System.out.println("Armies attacker: " + attacker.getArmies());
+        if(defender.getOccupied() != attacker.getOccupied()){
+
+//            System.out.printf("Armies defender: %2d\n", defender.getArmies());
+//            System.out.printf("Armies attacker: %2d", attacker.getArmies());
+            System.out.println();
+            System.out.println();
+        }
     }
 
     private static int rollDice(){

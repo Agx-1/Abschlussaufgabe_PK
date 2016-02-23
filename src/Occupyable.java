@@ -5,6 +5,9 @@ import java.awt.*;
  */
 public interface Occupyable {
 
+    //returns the name of the current instance
+    String getName();
+
     //get the number of armies in current territory
     int getArmies();
 
@@ -14,8 +17,11 @@ public interface Occupyable {
     //increase the number of armies in current territory by 1
     void addReinforcement();
 
-    //get number of occupying player
+    //get occupying player
     int getOccupied();
+
+    //set occupying player
+    void setOccupied(int player);
 
     //occupy this territory by 'player' with 'armies'
     void occupy(int player, int armies);
