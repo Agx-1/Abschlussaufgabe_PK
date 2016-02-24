@@ -14,8 +14,7 @@ public class Game {        //class is probably obsolete, remove if finished
     private static Occupyable currentlyConquered = null;
 
     //attacker has to have >1 armies in his VoidTerritory
-    public static void attack(Occupyable attacker, Occupyable defender)
-    {
+    public static void attack(Occupyable attacker, Occupyable defender) {
         int[] attackerDices;
         int[] defenderDices;
 

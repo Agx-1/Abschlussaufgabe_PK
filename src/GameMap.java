@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 
+//ActionListener interface is necessary to get selected file from dialogue
 public class GameMap implements ActionListener {
 
     private Map<String, Territory> territories = new HashMap<>();
@@ -57,7 +58,7 @@ public class GameMap implements ActionListener {
     public GameMap(String path) {
 
         this.path = path;
-        initializeMembers();
+        initMembers();
         initMainMapFrame();
         initMainMapPanel();
 
@@ -83,7 +84,7 @@ public class GameMap implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
 
-        initializeMembers();
+        initMembers();
         path = fileChooser.getSelectedFile().getPath();
 
         try {
@@ -93,16 +94,7 @@ public class GameMap implements ActionListener {
             System.out.println("NullPointerException caught");
         }
 
-        initCapital();
-
-        updateTextField("", "");
-        labelPlayer.setText("");
-        initTextField("Claim Phase:", "Select a territory");
-        initPlayerField();
-        initRoundLabel();
-        initReinforcementsField();
-
-        mainMapFrame.repaint();
+        restartGame();
     }
 
     private class Chooser extends JFileChooser implements ActionListener {
@@ -121,6 +113,10 @@ public class GameMap implements ActionListener {
     private class AI {
 
         void makeMove() {
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ie){}
 
             switch (Game.phase) {
 
@@ -169,38 +165,45 @@ public class GameMap implements ActionListener {
 
         Territory claimTerritory() {
 
-//            boolean unclaimed;
-//            int friendlyNeighbors;          //'friendly' means either unclaimed or own territory
-//            LinkedList<Continent> unclaimedContinents = new LinkedList<>();
-//
-//            for (Continent continent : continents){
-//
-//                unclaimed = true;
-//
-//                for(Territory member : continent.getMembers()){
-//
-//                    if(member.getOccupied() != -1){
-//
-//                        unclaimed = false;
-//                    }
-//                }
-//
-//                if(unclaimed){
-//
-//                    unclaimedContinents.add(continent);
-//                }
-//            }
-//
-//            int continentChoice = (int)(Math.random()*unclaimedContinents.size())%unclaimedContinents.size();
-//
-//            for (Territory territory : unclaimedContinents.get(continentChoice).getMembers()){
-//
-//
-//            }
+            Territory territoryChoice = null;
 
-            LinkedList<Territory> unclaimedTerritories = findByOccupied(-1, false);
-            int choice = (int) (Math.random() * unclaimedTerritories.size()) % unclaimedTerritories.size();
-            return unclaimedTerritories.get(choice);
+            if (continents.size() != 0) {
+
+                //LinkedList<Continent> claimableContinents = getClaimableContinents();
+
+                Continent continentChoice = claimContinent(getClaimableContinents());
+
+                if (continentChoice != null) {
+
+                    territoryChoice = claimNearOwnTerritory(continentChoice);
+                    return territoryChoice;
+
+                } else {
+
+                    LinkedList<Continent> availableContinents = getAvailableContinents();
+
+                    //ToDo: fix up this passage
+                    if (availableContinents.size() != 0) {
+
+                        int choice = (int) (Math.random() * availableContinents.size()) % availableContinents.size();
+                        continentChoice = availableContinents.get(choice);
+
+                        territoryChoice = claimNearOwnTerritory(continentChoice);
+
+                    } else {
+
+                        System.out.println("Error: AI was called when all Continents were full");
+                    }
+                }
+            }else {
+
+                LinkedList<Territory> unclaimedTerritories = findByOccupied(-1, false);
+                int choice = (int) (Math.random() * unclaimedTerritories.size()) % unclaimedTerritories.size();
+                territoryChoice = unclaimedTerritories.get(choice);
+
+            }
+
+            return territoryChoice;
         }
 
         Territory distributeReinforcements() {
@@ -299,6 +302,126 @@ public class GameMap implements ActionListener {
             } else {
                 return true;
             }
+        }
+
+        LinkedList<Continent> getClaimableContinents(){
+
+            boolean claimed;
+            boolean full;
+            LinkedList<Continent> claimableContinents = new LinkedList<>();
+
+            //search continents for which bonus could still be acquired
+            for (Continent continent : continents) {
+
+                claimed = false;
+                full = true;
+
+                for (Territory member : continent.getMembers()) {
+
+                    if (member.getOccupied() != -1 && member.getOccupied() != 0) {
+                        claimed = true;
+                    }
+
+                    if(member.getOccupied() == -1){
+                        full = false;
+                    }
+                }
+
+                if (!claimed && !full) {
+
+                    claimableContinents.add(continent);
+                }
+            }
+
+            return claimableContinents;
+        }
+
+        LinkedList<Continent> getAvailableContinents(){
+
+            LinkedList<Continent> result = new LinkedList<>();
+
+            //find continents with at least one unclaimed territory
+            for (Continent continent : continents) {
+                for (Territory member : continent.getMembers()) {
+
+                    if (member.getOccupied() == -1) {
+                        result.add(continent);
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        LinkedList<Territory> getAvailableTerritories(Continent continentChoice){
+
+            LinkedList<Territory> result = new LinkedList<>();
+
+            for(Territory member : continentChoice.getMembers()){
+                if(member.getOccupied() == -1) {
+                    result.add(member);
+                }
+            }
+
+            return result;
+        }
+
+        Continent claimContinent(LinkedList<Continent> claimableContinents){
+
+            Continent result = null;
+
+            boolean preferred;                  //true iff one territory on this continent is already claimed by AI
+
+            for (Continent claimableContinent : claimableContinents) {
+
+                preferred = false;
+
+                for (Territory member : claimableContinent.getMembers()) {
+
+                    if (member.getOccupied() == 0) {
+                        preferred = true;
+                    }
+                }
+
+                result = claimableContinent;
+
+                //if AI has claimed one territory of a continent, continue claiming on that continent
+                if (preferred) {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        Territory claimNearOwnTerritory(Continent continentChoice){
+
+            int maxOwnNeighbors = -1;
+            int currentOwnNeighbors;
+
+            Territory result = null;
+
+            //try to claim territories near own claimed territories
+            for (Territory member : continentChoice.getMembers()) {
+
+                currentOwnNeighbors = 0;
+
+                if (member.getOccupied() == -1) {
+                    for (Territory neighbor : member.getNeighbors()) {
+
+                        if (neighbor.getOccupied() == 0) {
+                            currentOwnNeighbors++;
+                        }
+                    }
+
+                    if (currentOwnNeighbors > maxOwnNeighbors) {
+                        result = member;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 
@@ -594,7 +717,7 @@ public class GameMap implements ActionListener {
                         nextPlayer();
                     }
                 } else {
-                    initializeMembers();
+                    initMembers();
                     restartGame();
                 }
             }
@@ -672,7 +795,7 @@ public class GameMap implements ActionListener {
         mainMapFrame.pack();
     }
 
-    private void initializeMembers() {
+    private void initMembers() {
 
         computerOpponent = new AI();
 
