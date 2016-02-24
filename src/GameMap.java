@@ -33,15 +33,15 @@ public class GameMap implements ActionListener {
     private String path;
 
     //used to display if player won or lost
-    JLabel labelEnd = new JLabel("", SwingConstants.CENTER);
-    JLabel labelEndFrame = new JLabel("", SwingConstants.CENTER);
+    private JLabel labelEnd = new JLabel("", SwingConstants.CENTER);
+    private JLabel labelEndFrame = new JLabel("", SwingConstants.CENTER);
 
     //extended JFileChooser class to enable responding to a menu-click
-    private Chooser fileChooser = new Chooser("maps/");
+    private ListeningJFileChooser fileChooser = new ListeningJFileChooser("maps/");
 
-    JMenuBar jMenuBar = new JMenuBar();
-    JMenu loadMenu = new JMenu("Load...");
-    JMenuItem loadItem = new JMenuItem("Load from file...");
+    private JMenuBar jMenuBar = new JMenuBar();
+    private JMenu loadMenu = new JMenu("Load...");
+    private JMenuItem loadItem = new JMenuItem("Load from file...");
 
     //prevent that map is only partially drawn
     private boolean loadingFinished = false;
@@ -61,13 +61,7 @@ public class GameMap implements ActionListener {
         initMembers();
         initMainMapFrame();
         initMainMapPanel();
-
-        mainMapPanel.add(jMenuBar);
-        mainMapFrame.setJMenuBar(jMenuBar);
-        jMenuBar.add(loadMenu);
-        loadMenu.add(loadItem);
-        loadItem.addActionListener(fileChooser);
-        fileChooser.addActionListener(this);
+        initMenu();
 
         loadMap(readMapFile(this.path));
 
@@ -91,15 +85,15 @@ public class GameMap implements ActionListener {
             loadMap(readMapFile(path));
         } catch (NullPointerException npe) {
 
-            System.out.println("NullPointerException caught");
+            System.out.println("File not found/not valid.");
         }
 
         restartGame();
     }
 
-    private class Chooser extends JFileChooser implements ActionListener {
+    private class ListeningJFileChooser extends JFileChooser implements ActionListener {
 
-        public Chooser(String path) {
+        public ListeningJFileChooser(String path) {
 
             super(path);
         }
@@ -811,6 +805,16 @@ public class GameMap implements ActionListener {
         b.setText("end this round");
     }
 
+    private void initMenu(){
+
+        mainMapPanel.add(jMenuBar);
+        mainMapFrame.setJMenuBar(jMenuBar);
+        jMenuBar.add(loadMenu);
+        loadMenu.add(loadItem);
+        loadItem.addActionListener(fileChooser);
+        fileChooser.addActionListener(this);
+    }
+
     private void initMouseAdapter() {
 
         MouseAdapter ma = new MouseAdapter() {
@@ -1225,7 +1229,7 @@ public class GameMap implements ActionListener {
             loadMap(readMapFile(path));
         } catch (NullPointerException npe) {
 
-            System.out.println("NullPointerException caught");
+            System.out.println("File not found/valid");
         }
 
         initCapital();
