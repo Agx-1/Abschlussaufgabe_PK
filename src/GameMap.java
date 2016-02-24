@@ -406,14 +406,15 @@ public class GameMap implements ActionListener {
         }
     }
 
-    private class Logic {        //class is probably obsolete, remove if finished
+    private class Logic {
+
+        final int playerCount = 2;    //number of players participating in the logic
+        int currentPlayer = 1;        //0 for computer, upcoming integers for human players
+        int occupiedTerritories = 0;
+        int round = 1;
 
         // -1 stands for claim phase, 0 for reinforce, 1 for attacking and moving
         int phase = -1;
-        final int playerCount = 2;    //number of players participating in the logic
-        int currentPlayer = 1;       //0 for computer, upcoming integers for human players
-        int occupiedTerritories = 0;
-        int round = 1;
         Occupyable currentlyConquered = null;
 
         //attacker has to have >1 armies in his VoidTerritory
@@ -527,25 +528,100 @@ public class GameMap implements ActionListener {
             }
         }
 
-        int rollDice(){
+        void setCurrentlyConquered(Occupyable territory){
 
-            return ((int)(Math.random()*6))%6 + 1;      //tested and approved
-
+            currentlyConquered = territory;
         }
 
-        int[] reverse(int[] array){
+        void claimPhase(Territory selectedTerritory) {
 
-            int[] result = new int[array.length];
+            if (selectedTerritory.getOccupied() == -1) {
 
-            for (int i = 0; i < array.length; i++) {
+                selectedTerritory.setOccupied(currentPlayer);
+                selectedTerritory.addReinforcement();
 
-                result[i] = array[array.length - i - 1];
+                occupiedTerritories++;
+
+                if (territories.size() == occupiedTerritories) {
+
+                    nextPhase();
+                    labelRound.setVisible(true);
+
+                } else {
+
+                    nextPlayer();
+                }
+            }
+        }
+
+        void reinforcePhase(Territory selectedTerritory) {
+
+            if (selectedTerritory.getOccupied() == currentPlayer) {
+
+                if (reinforcements > 0) {
+
+                    selectedTerritory.addReinforcement();
+                    reinforcements--;
+                    //System.out.println("remaining reinforcements: " + reinforcements);
+
+                    if (reinforcements == 0) {
+
+                        if (currentPlayer == 0) {
+
+                            nextPhase();
+
+                        } else {
+
+                            nextPlayer();
+                        }
+                    }
+                }
             }
 
-            return result;
+            updateReinforcementsLabel();
         }
 
-        public void calculateReinforcements() {
+        void attackMovePhase(Territory selectedTerritory) {
+
+            if (selectedTerritory.getOccupied() == currentPlayer) {
+
+                origin = selectedTerritory;
+
+            } else {
+                if (selectedTerritory.getName() != "" && origin != null)
+                    if (origin.isNeighborOf(selectedTerritory) && origin.getArmies() > 1) {
+
+                        attack(origin, selectedTerritory);
+                    }
+            }
+
+            mainMapPanel.repaint();
+
+            for (int i = 0; i < playerCount; i++) {
+
+                if (winner == -1) {
+                    winner = i;
+                } else {
+                    break;
+                }
+
+                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
+
+                    if (entry.getValue().getOccupied() != i) {
+
+                        winner = -1;
+                        break;
+                    }
+                }
+            }
+
+            if (winner > -1) {
+
+                displayEndMessage(winner);
+            }
+        }
+
+        void calculateReinforcements() {
 
             //System.out.println("Calculating reinforcements for player " + logic.currentPlayer);
             System.out.println("Reinforcements: ");
@@ -591,7 +667,7 @@ public class GameMap implements ActionListener {
             updateReinforcementsLabel();
         }
 
-        private void nextPlayer() {
+        void nextPlayer() {
 
             logic.currentPlayer++;
             logic.currentPlayer %= logic.playerCount;
@@ -614,7 +690,7 @@ public class GameMap implements ActionListener {
             }
         }
 
-        private void nextPhase() {
+        void nextPhase() {
 
             logic.currentPlayer = 1;
             updatePlayerLabel();
@@ -649,102 +725,27 @@ public class GameMap implements ActionListener {
 
         }
 
-        void setCurrentlyConquered(Occupyable territory){
-
-            currentlyConquered = territory;
-        }
-
-        private void claimPhase(Territory selectedTerritory) {
-
-            if (selectedTerritory.getOccupied() == -1) {
-
-                selectedTerritory.setOccupied(currentPlayer);
-                selectedTerritory.addReinforcement();
-
-                occupiedTerritories++;
-
-                if (territories.size() == occupiedTerritories) {
-
-                    nextPhase();
-                    labelRound.setVisible(true);
-
-                } else {
-
-                    nextPlayer();
-                }
-            }
-        }
-
-        private void reinforcePhase(Territory selectedTerritory) {
-
-            if (selectedTerritory.getOccupied() == currentPlayer) {
-
-                if (reinforcements > 0) {
-
-                    selectedTerritory.addReinforcement();
-                    reinforcements--;
-                    //System.out.println("remaining reinforcements: " + reinforcements);
-
-                    if (reinforcements == 0) {
-
-                        if (currentPlayer == 0) {
-
-                            nextPhase();
-
-                        } else {
-
-                            nextPlayer();
-                        }
-                    }
-                }
-            }
-
-            updateReinforcementsLabel();
-        }
-
-        private void attackMovePhase(Territory selectedTerritory) {
-
-            if (selectedTerritory.getOccupied() == currentPlayer) {
-
-                origin = selectedTerritory;
-
-            } else {
-                if (selectedTerritory.getName() != "" && origin != null)
-                    if (origin.isNeighborOf(selectedTerritory) && origin.getArmies() > 1) {
-
-                        attack(origin, selectedTerritory);
-                    }
-            }
-
-            mainMapPanel.repaint();
-
-            for (int i = 0; i < playerCount; i++) {
-
-                if (winner == -1) {
-                    winner = i;
-                } else {
-                    break;
-                }
-
-                for (Map.Entry<String, Territory> entry : territories.entrySet()) {
-
-                    if (entry.getValue().getOccupied() != i) {
-
-                        winner = -1;
-                        break;
-                    }
-                }
-            }
-
-            if (winner > -1) {
-
-                displayEndMessage(winner);
-            }
-        }
-
         Occupyable getCurrentlyConquered(){
 
             return currentlyConquered;
+        }
+
+        int[] reverse(int[] array){
+
+            int[] result = new int[array.length];
+
+            for (int i = 0; i < array.length; i++) {
+
+                result[i] = array[array.length - i - 1];
+            }
+
+            return result;
+        }
+
+        int rollDice(){
+
+            return ((int)(Math.random()*6))%6 + 1;      //tested and approved
+
         }
     }
 
