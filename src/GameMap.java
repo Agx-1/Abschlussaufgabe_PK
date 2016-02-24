@@ -169,20 +169,16 @@ public class GameMap implements ActionListener {
 
             if (continents.size() != 0) {
 
-                //LinkedList<Continent> claimableContinents = getClaimableContinents();
-
                 Continent continentChoice = claimContinent(getClaimableContinents());
 
                 if (continentChoice != null) {
 
                     territoryChoice = claimNearOwnTerritory(continentChoice);
-                    return territoryChoice;
 
                 } else {
 
                     LinkedList<Continent> availableContinents = getAvailableContinents();
 
-                    //ToDo: fix up this passage
                     if (availableContinents.size() != 0) {
 
                         int choice = (int) (Math.random() * availableContinents.size()) % availableContinents.size();
@@ -348,19 +344,6 @@ public class GameMap implements ActionListener {
                         result.add(continent);
                         break;
                     }
-                }
-            }
-
-            return result;
-        }
-
-        LinkedList<Territory> getAvailableTerritories(Continent continentChoice){
-
-            LinkedList<Territory> result = new LinkedList<>();
-
-            for(Territory member : continentChoice.getMembers()){
-                if(member.getOccupied() == -1) {
-                    result.add(member);
                 }
             }
 
