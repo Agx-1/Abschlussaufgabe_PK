@@ -1073,7 +1073,7 @@ public class GameMap implements ActionListener {
         labelRound.setSize(100, 20);
         labelRound.setLocation(10, 605);
         labelRound.setForeground(new Color(97, 91, 97));
-        mainMapFrame.add(labelRound);
+        mainMapPanel.add(labelRound);
     }
 
     private void initMainMapFrame() {
@@ -1082,7 +1082,6 @@ public class GameMap implements ActionListener {
 
         mainMapFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         mainMapFrame.setSize(1250, 650);
-        mainMapFrame.setBackground(new Color(0, 153, 204));
         mainMapFrame.setResizable(false);
         mainMapFrame.setVisible(true);
         mainMapFrame.setTitle("All Those Territories");
@@ -1095,6 +1094,8 @@ public class GameMap implements ActionListener {
 
             @Override
             protected void paintComponent(Graphics g) {
+
+                super.paintComponent(g);
 
                 if (loadingFinished) {
 
@@ -1113,6 +1114,7 @@ public class GameMap implements ActionListener {
         };
 
         mainMapPanel.setLayout(null);
+        mainMapPanel.setBackground(new Color(0, 153, 204));
 
         initMouseAdapter();
         mainMapFrame.add(mainMapPanel);
@@ -1154,7 +1156,7 @@ public class GameMap implements ActionListener {
 
     private void initMenu(){
 
-        mainMapPanel.add(jMenuBar);
+        //mainMapPanel.add(jMenuBar);
         mainMapFrame.setJMenuBar(jMenuBar);
         jMenuBar.add(loadMenu);
         loadMenu.add(loadItem);
@@ -1167,7 +1169,7 @@ public class GameMap implements ActionListener {
         MouseAdapter ma = new MouseAdapter() {
 
             @Override
-            public void mouseClicked(MouseEvent me) {
+            public void mousePressed(MouseEvent me) {
 
                 Territory selectedTerritory = null;
 
@@ -1252,7 +1254,7 @@ public class GameMap implements ActionListener {
 
         labelPlayer = new JLabel("");
 
-        mainMapFrame.add(labelPlayer);
+        mainMapPanel.add(labelPlayer);
 
         labelPlayer.setText("Player: " + Integer.toString(logic.currentPlayer));
         labelPlayer.setFont(new Font("Arial", Font.PLAIN, 10));
@@ -1265,12 +1267,12 @@ public class GameMap implements ActionListener {
 
         labelReinforcements = new JLabel("", SwingConstants.CENTER);
         labelReinforcements.setText("(You have " + Integer.toString(reinforcements) + " reinforcements left.)");
-        labelReinforcements.setFont(new Font("Courier New", Font.PLAIN, 15));
+        labelReinforcements.setFont(new Font("Arial", Font.PLAIN, 15));
         labelReinforcements.setSize(700, 30);
         labelReinforcements.setLocation(300, 603);
         labelReinforcements.setForeground(new Color(50, 50, 50));
         labelReinforcements.setVisible(false);
-        mainMapFrame.add(labelReinforcements);
+        mainMapPanel.add(labelReinforcements);
     }
 
     private void initTextField(String phase, String instruction) {
@@ -1278,8 +1280,8 @@ public class GameMap implements ActionListener {
         labelPhase = new JLabel("", SwingConstants.CENTER);
         labelInstr = new JLabel("", SwingConstants.CENTER);
 
-        mainMapFrame.add(labelPhase);
-        mainMapFrame.add(labelInstr);
+        mainMapPanel.add(labelPhase);
+        mainMapPanel.add(labelInstr);
 
         labelPhase.setText(phase);
         labelPhase.setFont(new Font("Arial", Font.BOLD, 20));
@@ -1364,7 +1366,7 @@ public class GameMap implements ActionListener {
         labelEndFrame.setOpaque(true);
         labelEndFrame.setBorder(border);
 
-        labelRound.setVisible(false);
+        //labelRound.setVisible(false);
         labelPlayer.setVisible(false);
         labelReinforcements.setVisible(false);
         labelPhase.setVisible(false);
