@@ -82,13 +82,6 @@ public class GameMap implements ActionListener {
         initMembers();
         path = fileChooser.getSelectedFile().getPath();
 
-        try {
-            loadMap(readMapFile(path));
-        } catch (NullPointerException npe) {
-
-            System.out.println("File not found/not valid.");
-        }
-
         restartGame();
     }
 
@@ -398,6 +391,7 @@ public class GameMap implements ActionListener {
 
                     if (currentOwnNeighbors > maxOwnNeighbors) {
                         result = member;
+                        maxOwnNeighbors = currentOwnNeighbors;
                     }
                 }
             }
@@ -920,7 +914,7 @@ public class GameMap implements ActionListener {
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) { //draws lines between capitals of neighbors
             g2d.setColor(Color.WHITE);
-            String from = entry.getKey();                                       //From...
+            String from = entry.getKey();
             int fromX = entry.getValue().getCapitalLocation().x;
             int fromY = entry.getValue().getCapitalLocation().y;
 
@@ -1304,7 +1298,6 @@ public class GameMap implements ActionListener {
     private void updatePlayerLabel() {
 
         labelPlayer.setText("Player: " + logic.currentPlayer);
-        mainMapFrame.repaint();
     }
 
     private void updateReinforcementsLabel() {
@@ -1327,6 +1320,8 @@ public class GameMap implements ActionListener {
         mainMapPanel.add(labelEnd);
         mainMapPanel.add(labelEndFrame);
         Border border = LineBorder.createBlackLineBorder();
+        Color inner = Color.white;
+        Color outer = Color.white;
 
         //deletes all Capitals in the Range of the Frame
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
@@ -1343,9 +1338,13 @@ public class GameMap implements ActionListener {
         switch (player) {
             case 0:
                 ans = "You lost :(";
+                inner = new Color(245, 44, 24);
+                outer = new Color(194, 0, 0);
                 break;
             case 1:
                 ans = "You won!";
+                inner = new Color(92, 221, 73);
+                outer = new Color(10, 180, 30);
                 break;
             default:
                 ans = "ERROR";
@@ -1356,13 +1355,13 @@ public class GameMap implements ActionListener {
         labelEnd.setSize(400, 200);
         labelEnd.setLocation(425, 225);
         labelEnd.setForeground(Color.BLACK);
-        labelEnd.setBackground(new Color(255, 133, 8));
+        labelEnd.setBackground(inner);
         labelEnd.setOpaque(true);
         labelEnd.setBorder(border);
 
         labelEndFrame.setSize(440, 240);
         labelEndFrame.setLocation(405, 205);
-        labelEndFrame.setBackground(new Color(205, 86, 11));
+        labelEndFrame.setBackground(outer);
         labelEndFrame.setOpaque(true);
         labelEndFrame.setBorder(border);
 
@@ -1385,7 +1384,7 @@ public class GameMap implements ActionListener {
             loadMap(readMapFile(path));
         } catch (NullPointerException npe) {
 
-            System.out.println("File not found/valid");
+            System.out.println("File not found/not valid.");
         }
 
         initCapital();

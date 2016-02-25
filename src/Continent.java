@@ -5,9 +5,9 @@ import java.util.LinkedList;
  */
 public class Continent {
 
-    public final String name;
-    public final int bonus;
-    public final LinkedList<Territory> members;
+    private final String name;
+    private final int bonus;
+    private final LinkedList<Territory> members;
 
     public Continent(String name, int reinforcementBonus, LinkedList<Territory> members){
 
