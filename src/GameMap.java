@@ -130,7 +130,7 @@ public class GameMap implements ActionListener {
         /**
          * @param statusOccupied find territories with 'occupied = statusOccupied'
          * @param complement     iff true, find ONLY territories with 'occupied != statusOccupied'
-         * @return
+         *
          */
         LinkedList<Territory> findByOccupied(int statusOccupied, boolean complement) {
 
@@ -277,11 +277,7 @@ public class GameMap implements ActionListener {
                 }
             }
 
-            if (minDeficit < 0) {
-                return false;
-            } else {
-                return true;
-            }
+            return minDeficit >= 0;
         }
 
         LinkedList<Continent> getClaimableContinents(){
@@ -471,16 +467,15 @@ public class GameMap implements ActionListener {
 
             //just for testing, remove if finished
             System.out.print("Attacker Array: ");
-            for (int i = 0; i < attackerDices.length; i++) {
-
-                System.out.print(attackerDices[i] + ", ");
+            for (int attackerDice : attackerDices) {
+                System.out.print(attackerDice + ", ");
             }
 
             System.out.println();
             System.out.print("Defender Array: ");
-            for (int i = 0; i < defenderDices.length; i++) {
+            for (int defenderDice : defenderDices) {
 
-                System.out.print(defenderDices[i] + ", ");
+                System.out.print(defenderDice + ", ");
             }
 
             //taking the minimum assures the index staying in the array, even if there are more defenders than attackers
@@ -502,7 +497,7 @@ public class GameMap implements ActionListener {
                     defender.occupy(currentPlayer, attackerDices.length);
                     setCurrentlyConquered(defender);
 
-                    for (int j = 0; j < attackerDices.length; j++) {
+                    for (int attackerDice : attackerDices) {
                         attacker.removeArmy();
                     }
 
@@ -582,7 +577,7 @@ public class GameMap implements ActionListener {
                 origin = selectedTerritory;
 
             } else {
-                if (selectedTerritory.getName() != "" && origin != null)
+                if (!Objects.equals(selectedTerritory.getName(), "") && origin != null)
                     if (origin.isNeighborOf(selectedTerritory) && origin.getArmies() > 1) {
 
                         attack(origin, selectedTerritory);
@@ -636,9 +631,6 @@ public class GameMap implements ActionListener {
 
                     reinforcements += continent.getBonus();
                     System.out.printf("     Bonus for %-15s: %2d \n", continent.getName(), continent.getBonus());
-                } else {
-
-                    //System.out.printf("     Reinforcements for %-15s: %2d \n", continent.getName(), 0);
                 }
             }
 
@@ -794,7 +786,7 @@ public class GameMap implements ActionListener {
             try {
                 coordX[j] = Integer.parseInt(helperCoordinates[2 * j]);
                 coordY[j] = Integer.parseInt(helperCoordinates[2 * j + 1]);
-            } catch (NumberFormatException nfe) {
+            } catch (NumberFormatException ignored) {
             }
         }
 
@@ -830,7 +822,7 @@ public class GameMap implements ActionListener {
 
             try {
                 capitalCoordinates[j] = Integer.parseInt(helperCoordinates[j]);
-            } catch (NumberFormatException nfe) {
+            } catch (NumberFormatException ignored) {
             }
         }
 
@@ -1047,13 +1039,7 @@ public class GameMap implements ActionListener {
 
         for (Map.Entry<String, Territory> entry : territories.entrySet()) {
 
-            String from = entry.getKey();
-
-            int x = entry.getValue().getCapitalLocation().x;
-            int y = entry.getValue().getCapitalLocation().y;
-
             mainMapPanel.add(entry.getValue().getCapital());
-
         }
 
         mainMapFrame.repaint();
